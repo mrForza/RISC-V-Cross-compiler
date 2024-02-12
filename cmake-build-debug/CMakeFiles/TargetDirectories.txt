@@ -1,0 +1,3 @@
+C:/Users/inter/Documents/Projects/C/RISC-V-Cross-compiler/cmake-build-debug/CMakeFiles/RISC_V_Cross_compiler.dir
+C:/Users/inter/Documents/Projects/C/RISC-V-Cross-compiler/cmake-build-debug/CMakeFiles/edit_cache.dir
+C:/Users/inter/Documents/Projects/C/RISC-V-Cross-compiler/cmake-build-debug/CMakeFiles/rebuild_cache.dir
