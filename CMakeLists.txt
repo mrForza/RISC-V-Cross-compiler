@@ -3,4 +3,4 @@ project(RISC_V_Cross_compiler C)
 
 set(CMAKE_C_STANDARD 11)
 
-add_executable(RISC_V_Cross_compiler main.c)
+add_executable(RISC_V_Cross_compiler main.c include/lexer/token.h include/lexer/lexer.h)
