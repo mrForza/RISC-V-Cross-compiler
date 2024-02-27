@@ -82,6 +82,9 @@
 		<Unit filename="C:/Users/inter/Documents/Projects/C/RISC-V-Cross-compiler/include/lexer/token.h">
 			<Option target="RISC_V_Cross_compiler"/>
 		</Unit>
+		<Unit filename="C:/Users/inter/Documents/Projects/C/RISC-V-Cross-compiler/include/utils/vector.h">
+			<Option target="RISC_V_Cross_compiler"/>
+		</Unit>
 		<Unit filename="C:/Users/inter/Documents/Projects/C/RISC-V-Cross-compiler/main.c">
 			<Option target="RISC_V_Cross_compiler"/>
 		</Unit>
