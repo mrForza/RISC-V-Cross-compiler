@@ -2,7 +2,7 @@
 #include "include/lexer/lexer.c"
 
 int main() {
-    FILE* file = fopen("../tests/test_2.txt", "r");
+    FILE* file = fopen("../tests/test_3.txt", "r");
     if (file != NULL) {
         fseek(file, 0, SEEK_END);
         unsigned long long buffer_size = ftell(file);
@@ -43,6 +43,102 @@ int main() {
                     break;
                 case INCORRECT:
                     printf("INCORRECT_TOKEN: %s\n", curr_token->attributes->text);
+                    break;
+                case LOOP:
+                    printf("LOOP_TOKEN: %s\n", curr_token->attributes->text);
+                    break;
+                case TRANSITION_INTERRUPT_OPERATOR:
+                    printf("INTERRUPT_TOKEN: %s\n", curr_token->attributes->text);
+                    break;
+                case CONST:
+                    printf("CONST_TOKEN: %s\n", curr_token->attributes->text);
+                    break;
+                case CONDITIONAL_OPERATOR:
+                    printf("CONDITIONAL_TOKEN: %s\n", curr_token->attributes->text);
+                    break;
+                case REAL_DATA_TYPE:
+                    printf("REAL_DATA_TYPE_TOKEN: %s\n", curr_token->attributes->text);
+                    break;
+                case COMPLEX_DATA_TYPE:
+                    printf("COMPLEX_DATA_TYPE_TOKEN: %s\n", curr_token->attributes->text);
+                    break;
+                case INTEGER_DATA_TYPE:
+                    printf("INTEGER_DATA_TYPE_TOKEN: %s\n", curr_token->attributes->text);
+                    break;
+                case TYPEDEF:
+                    printf("TYPEDEF_TOKEN: %s\n", curr_token->attributes->text);
+                    break;
+                case VOID:
+                    printf("VOID_TOKEN: %s\n", curr_token->attributes->text);
+                    break;
+                case CHAR:
+                    printf("CHAR_DATA_TYPE_TOKEN: %s\n", curr_token->attributes->text);
+                    break;
+                case CASE:
+                    printf("CASE_TOKEN: %s\n", curr_token->attributes->text);
+                    break;
+                case ENUM:
+                    printf("ENUM_DATA_TYPE_TOKEN: %s\n", curr_token->attributes->text);
+                    break;
+                case ELSE:
+                    printf("ELSE_TOKEN: %s\n", curr_token->attributes->text);
+                    break;
+                case FOR:
+                    printf("FOR_TYPE_TOKEN: %s\n", curr_token->attributes->text);
+                    break;
+                case FLOAT:
+                    printf("FLOAT_TOKEN: %s\n", curr_token->attributes->text);
+                    break;
+                case IF:
+                    printf("IF_TOKEN: %s\n", curr_token->attributes->text);
+                    break;
+                case INTEGER:
+                    printf("INT_TOKEN: %s\n", curr_token->attributes->text);
+                    break;
+                case UNION:
+                    printf("UNION_TOKEN: %s\n", curr_token->attributes->text);
+                    break;
+                case UNSIGNED:
+                    printf("UNSIGNED_TOKEN: %s\n", curr_token->attributes->text);
+                    break;
+                case STRUCT:
+                    printf("STRUCT_TOKEN: %s\n", curr_token->attributes->text);
+                    break;
+                case SIZEOF:
+                    printf("SIZEOF_TOKEN: %s\n", curr_token->attributes->text);
+                    break;
+                case SHORT:
+                    printf("SHORT_TOKEN: %s\n", curr_token->attributes->text);
+                    break;
+                case SIGNED:
+                    printf("SIGNED_TOKEN: %s\n", curr_token->attributes->text);
+                    break;
+                case SWITCH:
+                    printf("SWITCH_TOKEN: %s\n", curr_token->attributes->text);
+                    break;
+                case STATIC:
+                    printf("STATIC_TOKEN: %s\n", curr_token->attributes->text);
+                    break;
+                case ARITHMETIC_OPERATOR:
+                    printf("ARITHMETIC_TOKEN: %s\n", curr_token->attributes->text);
+                    break;
+                case COMPARISON_OPERATOR:
+                    printf("COMPARISON_TOKEN: %s\n", curr_token->attributes->text);
+                    break;
+                case LEFT_ROUND_BRACKET:
+                    printf("LEFT_ROUND_BRACKET: %s\n", curr_token->attributes->text);
+                    break;
+                case RIGHT_ROUND_BRACKET:
+                    printf("RIGHT_ROUND_BRACKET: %s\n", curr_token->attributes->text);
+                    break;
+                case LEFT_SQUARE_BRACKET:
+                    printf("LEFT_SQUARE_BRACKET: %s\n", curr_token->attributes->text);
+                    break;
+                case RIGHT_SQUARE_BRACKET:
+                    printf("RIGHT_SQUARE_BRACKET: %s\n", curr_token->attributes->text);
+                    break;
+                case IDENTIFIER:
+                    printf("IDENTIFIER: %s\n", curr_token->attributes->text);
                     break;
                 default:
                     break;

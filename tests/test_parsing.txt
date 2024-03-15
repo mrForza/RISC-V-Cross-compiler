@@ -1,0 +1,25 @@
+int main() {
+    int a = 1; // Объявление переменной
+
+    int b = (a + 3) * 2; // Арифметическое выражение
+
+    if (Cond) {
+        ...
+    } else if (Cond) {
+        ...
+    } else {
+        ...
+    }
+
+    for (Sttm; Cond; Expr) {
+        ...
+    }
+
+    do {
+        ...
+    } while (Cond);
+
+    while (Cond) {
+
+    }
+}
