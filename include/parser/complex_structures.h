@@ -14,13 +14,19 @@ struct Arithmetic_Expression {
 };
 
 
-bool is_expression(struct Vector* tokens);
+bool is_arithmetic_expression(void** tokens, size_t* start_position, size_t size);
 
 
-bool is_arithmetic_expression(struct Vector* tokens);
+bool is_single_declaration_expression(void** tokens, size_t* start_position, size_t size);
 
 
-bool is_assignment_expression(struct Vector* tokens);
+bool is_complex_declaration_expression(void** tokens, size_t* start_position, size_t size);
+
+
+bool is_single_definition_expression(void** tokens, size_t* start_position, size_t size);
+
+
+bool is_complex_definition_expression(void** tokens, size_t* start_position, size_t size);
 
 
 bool is_conditional_expression(struct Vector* tokens);
@@ -29,8 +35,8 @@ bool is_conditional_expression(struct Vector* tokens);
 bool is_logical_expression(void** tokens, size_t* start_position, size_t size);
 
 
-bool is_relational_expression(struct Vector* tokens);
+bool is_relational_expression(void** tokens, size_t* start_position, size_t size);
 
 
-bool is_bitwise_expression(struct Vector* tokens);
+bool is_bitwise_expression(void** tokens, size_t* start_position, size_t size);
 

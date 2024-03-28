@@ -1,0 +1,18 @@
+struct Vector* vector = init_vector(1024, TOKEN);
+push_back_token(vector, init_token(INT, "int", 0, 0, 0));
+push_back_token(vector, init_token(MULTIPLICATION_SIGN, "*", 0, 0, 0));
+push_back_token(vector, init_token(IDENTIFIER, "a", 0, 0, 0));
+push_back_token(vector, init_token(ASSIGN_OPERATOR, "=", 0, 0, 0));
+push_back_token(vector, init_token(DECIMAL_INTEGER_LITERAL, "1", 0, 0, 0));
+push_back_token(vector, init_token(COMMA, ",", 0, 0, 0));
+push_back_token(vector, init_token(IDENTIFIER, "b", 0, 0, 0));
+push_back_token(vector, init_token(ASSIGN_OPERATOR, "=", 0, 0, 0));
+push_back_token(vector, init_token(DECIMAL_INTEGER_LITERAL, "2", 0, 0, 0));
+
+
+struct Vector* vector = init_vector(1024, TOKEN);
+push_back_token(vector, init_token(INT, "int", 0, 0, 0));
+push_back_token(vector, init_token(MULTIPLICATION_SIGN, "*", 0, 0, 0));
+push_back_token(vector, init_token(IDENTIFIER, "a", 0, 0, 0));
+push_back_token(vector, init_token(ASSIGN_OPERATOR, "=", 0, 0, 0));
+push_back_token(vector, init_token(DECIMAL_INTEGER_LITERAL, "1", 0, 0, 0));

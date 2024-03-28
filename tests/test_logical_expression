@@ -1,0 +1,52 @@
+struct Vector* vector = init_vector(8, TOKEN);
+push_back_token(vector, init_token(LEFT_ROUND_BRACKET, "(", 0, 0, 0));
+push_back_token(vector, init_token(IDENTIFIER, "a", 0, 0, 0));
+push_back_token(vector, init_token(LOGIC_OPERATOR, "&&", 0, 0, 0));
+push_back_token(vector, init_token(IDENTIFIER, "b", 0, 0, 0));
+push_back_token(vector, init_token(RIGHT_ROUND_BRACKET, ")", 0, 0, 0));
+push_back_token(vector, init_token(LOGIC_OPERATOR, "||", 0, 0, 0));
+push_back_token(vector, init_token(IDENTIFIER, "c", 0, 0, 0));
+
+
+struct Vector* vector = init_vector(1024, TOKEN);
+push_back_token(vector, init_token(LEFT_ROUND_BRACKET, "(", 0, 0, 0));
+push_back_token(vector, init_token(IDENTIFIER, "a", 0, 0, 0));
+push_back_token(vector, init_token(LOGIC_OPERATOR, "&&", 0, 0, 0));
+push_back_token(vector, init_token(IDENTIFIER, "b", 0, 0, 0));
+push_back_token(vector, init_token(RIGHT_ROUND_BRACKET, ")", 0, 0, 0));
+push_back_token(vector, init_token(LOGIC_OPERATOR, "||", 0, 0, 0));
+push_back_token(vector, init_token(LEFT_ROUND_BRACKET, "(", 0, 0, 0));
+push_back_token(vector, init_token(IDENTIFIER, "c", 0, 0, 0));
+push_back_token(vector, init_token(LOGIC_OPERATOR, "||", 0, 0, 0));
+push_back_token(vector, init_token(IDENTIFIER, "d", 0, 0, 0));
+push_back_token(vector, init_token(RIGHT_ROUND_BRACKET, ")", 0, 0, 0));
+
+
+struct Vector* vector = init_vector(1024, TOKEN);
+push_back_token(vector, init_token(LEFT_ROUND_BRACKET, "(", 0, 0, 0));
+push_back_token(vector, init_token(IDENTIFIER, "a", 0, 0, 0));
+push_back_token(vector, init_token(LOGIC_OPERATOR, "&&", 0, 0, 0));
+push_back_token(vector, init_token(IDENTIFIER, "b", 0, 0, 0));
+push_back_token(vector, init_token(RIGHT_ROUND_BRACKET, ")", 0, 0, 0));
+push_back_token(vector, init_token(LOGIC_OPERATOR, "||", 0, 0, 0));
+push_back_token(vector, init_token(IDENTIFIER, "b", 0, 0, 0));
+
+
+struct Vector* vector = init_vector(1024, TOKEN);
+push_back_token(vector, init_token(LEFT_ROUND_BRACKET, "(", 0, 0, 0));
+push_back_token(vector, init_token(LEFT_ROUND_BRACKET, "(", 0, 0, 0));
+push_back_token(vector, init_token(IDENTIFIER, "a", 0, 0, 0));
+push_back_token(vector, init_token(LOGIC_OPERATOR, "&&", 0, 0, 0));
+push_back_token(vector, init_token(IDENTIFIER, "b", 0, 0, 0));
+push_back_token(vector, init_token(RIGHT_ROUND_BRACKET, ")", 0, 0, 0));
+push_back_token(vector, init_token(LOGIC_OPERATOR, "||", 0, 0, 0));
+push_back_token(vector, init_token(IDENTIFIER, "b", 0, 0, 0));
+push_back_token(vector, init_token(LOGIC_OPERATOR, "&&", 0, 0, 0));
+push_back_token(vector, init_token(IDENTIFIER, "b", 0, 0, 0));
+push_back_token(vector, init_token(RIGHT_ROUND_BRACKET, ")", 0, 0, 0));
+push_back_token(vector, init_token(LOGIC_OPERATOR, "||", 0, 0, 0));
+push_back_token(vector, init_token(LEFT_ROUND_BRACKET, "(", 0, 0, 0));
+push_back_token(vector, init_token(IDENTIFIER, "c", 0, 0, 0));
+push_back_token(vector, init_token(LOGIC_OPERATOR, "||", 0, 0, 0));
+push_back_token(vector, init_token(IDENTIFIER, "d", 0, 0, 0));
+push_back_token(vector, init_token(RIGHT_ROUND_BRACKET, ")", 0, 0, 0));

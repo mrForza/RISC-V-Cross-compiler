@@ -18,7 +18,7 @@ struct Vector* start_parsing(struct Parser* parser) {
 
     while (curr_token->type != END) {
         if (curr_token->type == SEMICOLON) {
-            // Add grammar to vector
+
         } else {
             if (((struct Token*)(tokens[index - 1]))->type == SEMICOLON) {
 
