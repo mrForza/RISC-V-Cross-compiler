@@ -101,7 +101,10 @@
 			[
 				1,
 				2,
-				3
+				3,
+				4,
+				5,
+				6
 			]
 		}
 	],
@@ -126,6 +129,21 @@
 		{
 			"backtrace" : 1,
 			"path" : "include/utils/vector.h",
+			"sourceGroupIndex" : 1
+		},
+		{
+			"backtrace" : 1,
+			"path" : "include/codegen/code_generator.h",
+			"sourceGroupIndex" : 1
+		},
+		{
+			"backtrace" : 1,
+			"path" : "include/parser/complex_structures.h",
+			"sourceGroupIndex" : 1
+		},
+		{
+			"backtrace" : 1,
+			"path" : "include/parser/parser.h",
 			"sourceGroupIndex" : 1
 		}
 	],

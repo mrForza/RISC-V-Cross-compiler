@@ -5,7 +5,8 @@
 
 enum Type_Of_Items {
     INT,
-    TOKEN
+    TOKEN,
+    GRAMMAR
 };
 
 

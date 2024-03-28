@@ -27,10 +27,6 @@ enum Type_Of_Token {
     BITWISE_OPERATOR = 19, // |, &, ~, <<, >>
     ASSIGN_OPERATOR = 20, // =
     COMPLEX_ASSIGN_OPERATOR = 21, // +=, -=, *=, /=, %=, |=, &=, ~=, <<=, >>=
-    ROUND_BRACKET = 22, // (, )
-    SQUARE_BRACKET = 23, // [, ]
-    CURLY_BRACKET = 24, // {, }
-    TRIANGLE_BRACKET = 25, // <, >
     HASH = 26, // #
     CONST = 27,
     STATIC = 28,
@@ -63,6 +59,7 @@ enum Type_Of_Token {
     RIGHT_CURLY_BRACKET = 55,
     LEFT_TRIANGLE_BRACKET = 56,
     RIGHT_TRIANGLE_BRACKET = 57,
+    SEMICOLON = 58
 };
 
 
