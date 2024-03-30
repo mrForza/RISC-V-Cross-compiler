@@ -13,11 +13,13 @@ CMakeFiles/RISC_V_Cross_compiler.dir/main.c.obj: C:/Users/inter/Documents/Projec
   C:/Programs/Programming/CLion/CLion\ 2023.1.2/bin/mingw/x86_64-w64-mingw32/include/_mingw_off_t.h \
   C:/Programs/Programming/CLion/CLion\ 2023.1.2/bin/mingw/x86_64-w64-mingw32/include/swprintf.inl \
   C:/Programs/Programming/CLion/CLion\ 2023.1.2/bin/mingw/x86_64-w64-mingw32/include/sec_api/stdio_s.h \
-  C:/Users/inter/Documents/Projects/C/RISC-V-Cross-compiler/include/utils/vector.c \
+  C:/Users/inter/Documents/Projects/C/RISC-V-Cross-compiler/include/parser/complex_structures.c \
+  C:/Users/inter/Documents/Projects/C/RISC-V-Cross-compiler/include/parser/complex_structures.h \
+  C:/Users/inter/Documents/Projects/C/RISC-V-Cross-compiler/include/lexer/token.h \
+  C:/Programs/Programming/CLion/CLion\ 2023.1.2/bin/mingw/lib/gcc/x86_64-w64-mingw32/11.2.0/include/stdbool.h \
   C:/Users/inter/Documents/Projects/C/RISC-V-Cross-compiler/include/utils/vector.h \
   C:/Users/inter/Documents/Projects/C/RISC-V-Cross-compiler/include/lexer/token.c \
   C:/Users/inter/Documents/Projects/C/RISC-V-Cross-compiler/include/lexer/token.h \
-  C:/Programs/Programming/CLion/CLion\ 2023.1.2/bin/mingw/lib/gcc/x86_64-w64-mingw32/11.2.0/include/stdbool.h \
   C:/Programs/Programming/CLion/CLion\ 2023.1.2/bin/mingw/x86_64-w64-mingw32/include/stdlib.h \
   C:/Programs/Programming/CLion/CLion\ 2023.1.2/bin/mingw/x86_64-w64-mingw32/include/corecrt_wstdlib.h \
   C:/Programs/Programming/CLion/CLion\ 2023.1.2/bin/mingw/lib/gcc/x86_64-w64-mingw32/11.2.0/include-fixed/limits.h \
@@ -28,10 +30,25 @@ CMakeFiles/RISC_V_Cross_compiler.dir/main.c.obj: C:/Users/inter/Documents/Projec
   C:/Programs/Programming/CLion/CLion\ 2023.1.2/bin/mingw/x86_64-w64-mingw32/include/malloc.h \
   C:/Programs/Programming/CLion/CLion\ 2023.1.2/bin/mingw/lib/gcc/x86_64-w64-mingw32/11.2.0/include/mm_malloc.h \
   C:/Programs/Programming/CLion/CLion\ 2023.1.2/bin/mingw/x86_64-w64-mingw32/include/errno.h \
-  C:/Users/inter/Documents/Projects/C/RISC-V-Cross-compiler/include/parser/complex_structures.c \
-  C:/Users/inter/Documents/Projects/C/RISC-V-Cross-compiler/include/parser/complex_structures.h \
-  C:/Users/inter/Documents/Projects/C/RISC-V-Cross-compiler/include/lexer/token.h \
-  C:/Users/inter/Documents/Projects/C/RISC-V-Cross-compiler/include/utils/vector.h
+  C:/Users/inter/Documents/Projects/C/RISC-V-Cross-compiler/include/parser/parser.c \
+  C:/Users/inter/Documents/Projects/C/RISC-V-Cross-compiler/include/parser/parser.h \
+  C:/Users/inter/Documents/Projects/C/RISC-V-Cross-compiler/include/lexer/lexer.h \
+  C:/Programs/Programming/CLion/CLion\ 2023.1.2/bin/mingw/x86_64-w64-mingw32/include/unistd.h \
+  C:/Programs/Programming/CLion/CLion\ 2023.1.2/bin/mingw/x86_64-w64-mingw32/include/io.h \
+  C:/Programs/Programming/CLion/CLion\ 2023.1.2/bin/mingw/x86_64-w64-mingw32/include/string.h \
+  C:/Programs/Programming/CLion/CLion\ 2023.1.2/bin/mingw/x86_64-w64-mingw32/include/sec_api/string_s.h \
+  C:/Programs/Programming/CLion/CLion\ 2023.1.2/bin/mingw/x86_64-w64-mingw32/include/process.h \
+  C:/Programs/Programming/CLion/CLion\ 2023.1.2/bin/mingw/x86_64-w64-mingw32/include/corecrt_startup.h \
+  C:/Programs/Programming/CLion/CLion\ 2023.1.2/bin/mingw/x86_64-w64-mingw32/include/sys/types.h \
+  C:/Programs/Programming/CLion/CLion\ 2023.1.2/bin/mingw/x86_64-w64-mingw32/include/getopt.h \
+  C:/Programs/Programming/CLion/CLion\ 2023.1.2/bin/mingw/x86_64-w64-mingw32/include/pthread_unistd.h \
+  C:/Users/inter/Documents/Projects/C/RISC-V-Cross-compiler/include/lexer/lexer.c \
+  C:/Users/inter/Documents/Projects/C/RISC-V-Cross-compiler/include/lexer/lexer.h \
+  C:/Users/inter/Documents/Projects/C/RISC-V-Cross-compiler/include/utils/vector.c \
+  C:/Users/inter/Documents/Projects/C/RISC-V-Cross-compiler/include/utils/vector.h \
+  C:/Users/inter/Documents/Projects/C/RISC-V-Cross-compiler/include/utils.c \
+  C:/Users/inter/Documents/Projects/C/RISC-V-Cross-compiler/include/codegen/code_generator.c \
+  C:/Users/inter/Documents/Projects/C/RISC-V-Cross-compiler/include/codegen/code_generator.h
 
 
 C:/Users/inter/Documents/Projects/C/RISC-V-Cross-compiler/main.c:
@@ -46,11 +63,15 @@ C:/Programs/Programming/CLion/CLion\ 2023.1.2/bin/mingw/x86_64-w64-mingw32/inclu
 
 C:/Programs/Programming/CLion/CLion\ 2023.1.2/bin/mingw/x86_64-w64-mingw32/include/_mingw_mac.h:
 
+C:/Users/inter/Documents/Projects/C/RISC-V-Cross-compiler/include/lexer/lexer.c:
+
 C:/Programs/Programming/CLion/CLion\ 2023.1.2/bin/mingw/x86_64-w64-mingw32/include/_mingw.h:
 
 C:/Users/inter/Documents/Projects/C/RISC-V-Cross-compiler/include/lexer/token.h:
 
 C:/Programs/Programming/CLion/CLion\ 2023.1.2/bin/mingw/x86_64-w64-mingw32/include/_mingw_secapi.h:
+
+C:/Users/inter/Documents/Projects/C/RISC-V-Cross-compiler/include/parser/parser.c:
 
 C:/Users/inter/Documents/Projects/C/RISC-V-Cross-compiler/include/parser/complex_structures.c:
 
@@ -62,17 +83,21 @@ C:/Programs/Programming/CLion/CLion\ 2023.1.2/bin/mingw/x86_64-w64-mingw32/inclu
 
 C:/Programs/Programming/CLion/CLion\ 2023.1.2/bin/mingw/x86_64-w64-mingw32/include/swprintf.inl:
 
-C:/Users/inter/Documents/Projects/C/RISC-V-Cross-compiler/include/utils/vector.c:
+C:/Programs/Programming/CLion/CLion\ 2023.1.2/bin/mingw/x86_64-w64-mingw32/include/io.h:
 
-C:/Users/inter/Documents/Projects/C/RISC-V-Cross-compiler/include/utils/vector.h:
+C:/Users/inter/Documents/Projects/C/RISC-V-Cross-compiler/include/parser/parser.h:
 
-C:/Users/inter/Documents/Projects/C/RISC-V-Cross-compiler/include/lexer/token.c:
-
-C:/Programs/Programming/CLion/CLion\ 2023.1.2/bin/mingw/lib/gcc/x86_64-w64-mingw32/11.2.0/include/stdbool.h:
+C:/Programs/Programming/CLion/CLion\ 2023.1.2/bin/mingw/x86_64-w64-mingw32/include/stdlib.h:
 
 C:/Users/inter/Documents/Projects/C/RISC-V-Cross-compiler/include/parser/complex_structures.h:
 
-C:/Programs/Programming/CLion/CLion\ 2023.1.2/bin/mingw/x86_64-w64-mingw32/include/stdlib.h:
+C:/Programs/Programming/CLion/CLion\ 2023.1.2/bin/mingw/lib/gcc/x86_64-w64-mingw32/11.2.0/include/stdbool.h:
+
+C:/Users/inter/Documents/Projects/C/RISC-V-Cross-compiler/include/utils/vector.h:
+
+C:/Programs/Programming/CLion/CLion\ 2023.1.2/bin/mingw/x86_64-w64-mingw32/include/pthread_unistd.h:
+
+C:/Users/inter/Documents/Projects/C/RISC-V-Cross-compiler/include/lexer/token.c:
 
 C:/Programs/Programming/CLion/CLion\ 2023.1.2/bin/mingw/x86_64-w64-mingw32/include/corecrt_wstdlib.h:
 
@@ -84,6 +109,8 @@ C:/Programs/Programming/CLion/CLion\ 2023.1.2/bin/mingw/x86_64-w64-mingw32/inclu
 
 C:/Programs/Programming/CLion/CLion\ 2023.1.2/bin/mingw/x86_64-w64-mingw32/include/crtdefs.h:
 
+C:/Programs/Programming/CLion/CLion\ 2023.1.2/bin/mingw/x86_64-w64-mingw32/include/string.h:
+
 C:/Programs/Programming/CLion/CLion\ 2023.1.2/bin/mingw/x86_64-w64-mingw32/include/sec_api/stdlib_s.h:
 
 C:/Programs/Programming/CLion/CLion\ 2023.1.2/bin/mingw/x86_64-w64-mingw32/include/malloc.h:
@@ -91,3 +118,25 @@ C:/Programs/Programming/CLion/CLion\ 2023.1.2/bin/mingw/x86_64-w64-mingw32/inclu
 C:/Programs/Programming/CLion/CLion\ 2023.1.2/bin/mingw/lib/gcc/x86_64-w64-mingw32/11.2.0/include/mm_malloc.h:
 
 C:/Programs/Programming/CLion/CLion\ 2023.1.2/bin/mingw/x86_64-w64-mingw32/include/errno.h:
+
+C:/Users/inter/Documents/Projects/C/RISC-V-Cross-compiler/include/lexer/lexer.h:
+
+C:/Programs/Programming/CLion/CLion\ 2023.1.2/bin/mingw/x86_64-w64-mingw32/include/unistd.h:
+
+C:/Programs/Programming/CLion/CLion\ 2023.1.2/bin/mingw/x86_64-w64-mingw32/include/sec_api/string_s.h:
+
+C:/Programs/Programming/CLion/CLion\ 2023.1.2/bin/mingw/x86_64-w64-mingw32/include/process.h:
+
+C:/Programs/Programming/CLion/CLion\ 2023.1.2/bin/mingw/x86_64-w64-mingw32/include/corecrt_startup.h:
+
+C:/Programs/Programming/CLion/CLion\ 2023.1.2/bin/mingw/x86_64-w64-mingw32/include/sys/types.h:
+
+C:/Programs/Programming/CLion/CLion\ 2023.1.2/bin/mingw/x86_64-w64-mingw32/include/getopt.h:
+
+C:/Users/inter/Documents/Projects/C/RISC-V-Cross-compiler/include/utils.c:
+
+C:/Users/inter/Documents/Projects/C/RISC-V-Cross-compiler/include/utils/vector.c:
+
+C:/Users/inter/Documents/Projects/C/RISC-V-Cross-compiler/include/codegen/code_generator.c:
+
+C:/Users/inter/Documents/Projects/C/RISC-V-Cross-compiler/include/codegen/code_generator.h:

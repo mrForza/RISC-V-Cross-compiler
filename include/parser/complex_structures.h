@@ -2,41 +2,87 @@
 #include "../utils/vector.h"
 
 
-struct Arithmetic_Operand {
-    void* data; // Number or Arithmetic_Operand
-};
-
-
 struct Arithmetic_Expression {
-    struct Arithmetic_Operand left_operand;
-    struct Token token;
-    struct Arithmetic_Operand right_operand;
+    void* left_operand;
+    char* operator; // ARITHMETIC_OPERATOR
+    void* right_operand;
+    bool is_left_expr;
+    bool is_right_expr;
 };
 
 
-bool is_arithmetic_expression(void** tokens, size_t* start_position, size_t size);
+struct Logic_Expression {
+    void* left_operand;
+    struct Token token; // LOGIC_OPERATOR
+    void* right_operand;
+};
 
 
-bool is_single_declaration_expression(void** tokens, size_t* start_position, size_t size);
+struct Bitwise_Expression {
+    void *left_operand;
+    char* operator; // BITWISE_OPERATOR
+    void *right_operand;
+    int left_expr;
+    int right_expr; // 0 - Number, 1 - Bitwise Expr, 2 - Arithmetic Expr
+};
 
 
-bool is_complex_declaration_expression(void** tokens, size_t* start_position, size_t size);
+struct Relational_Expression {
+    void *left_operand;
+    struct Token token; // RELATIONAL_OPERATOR
+    void *right_operand;
+};
 
 
-bool is_single_definition_expression(void** tokens, size_t* start_position, size_t size);
+struct Single_Declaration {
+    char* type;
+    char* var_name;
+};
 
 
-bool is_complex_definition_expression(void** tokens, size_t* start_position, size_t size);
+struct Complex_Declaration {
+    char* type;
+    char** var_names;
+};
 
 
-bool is_conditional_expression(struct Vector* tokens);
+struct Single_Definition {
+    char* type;
+    char* var_name;
+    char* value;
+};
 
 
-bool is_logical_expression(void** tokens, size_t* start_position, size_t size);
+struct Complex_Definition {
+    char* type;
+    char** var_names;
+    char** values;
+};
 
 
-bool is_relational_expression(void** tokens, size_t* start_position, size_t size);
+size_t find_close_bracket(void** tokens, size_t start_position, size_t size);
 
 
-bool is_bitwise_expression(void** tokens, size_t* start_position, size_t size);
+bool is_arithmetic_expression(void** tokens, const size_t* start_position, size_t size);
+
+
+bool is_single_declaration_expression(void** tokens, const size_t* start_position, size_t size);
+
+
+bool is_complex_declaration_expression(void** tokens, const size_t* start_position, size_t size);
+
+
+bool is_single_definition_expression(void** tokens, const size_t* start_position, size_t size);
+
+
+bool is_complex_definition_expression(void** tokens, const size_t* start_position, size_t size);
+
+
+bool is_logical_expression(void** tokens, const size_t* start_position, size_t size);
+
+
+bool is_relational_expression(void** tokens, const size_t* start_position, size_t size);
+
+
+bool is_bitwise_expression(void** tokens, const size_t* start_position, size_t size);
 

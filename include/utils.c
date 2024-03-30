@@ -15,6 +15,8 @@ char* get_substring(const char* source, unsigned long long left_idx, unsigned lo
 
 
 char* concatenate(const char* first_string, const char* second_string) {
+    strlen(first_string);
+    strlen(second_string);
     char* result_string = (char*)malloc(strlen(first_string) + strlen(second_string) + 1);
     strcpy(result_string, first_string);
     strcat(result_string, second_string);

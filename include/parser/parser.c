@@ -1,6 +1,6 @@
 #include "parser.h"
 #include "unistd.h"
-#include "../utils/vector.h"
+#include "../lexer/lexer.c"
 
 
 struct Parser init_parser(struct Lexer* lexer) {
@@ -31,4 +31,144 @@ struct Vector* start_parsing(struct Parser* parser) {
     }
 
     return wirths_grammars;
+}
+
+
+size_t find_close_bracket_2(void** tokens, size_t start_position, size_t size) {
+    size_t counter = 0;
+    for (size_t i = start_position; i < size; ++i) {
+        if (((struct Token*)(tokens[i]))->type == LEFT_ROUND_BRACKET) {
+            ++counter;
+        } else if (((struct Token*)(tokens[i]))->type == RIGHT_ROUND_BRACKET) {
+            --counter;
+            if (counter == 0) {
+                return i;
+            }
+        }
+    }
+    return -1;
+}
+
+
+struct Arithmetic_Expression get_arithmetic_expression(void** tokens, size_t start, size_t end) {
+    size_t i = start;
+    struct Arithmetic_Expression expression;
+    bool is_right = false;
+    expression.is_left_expr = false;
+    expression.is_right_expr = false;
+
+_check_operand:
+    if (((struct Token *) (tokens[i]))->type == LEFT_ROUND_BRACKET) {
+        size_t close_bracket_pos = find_close_bracket_2(tokens, i, end + 1);
+
+        if (is_right) {
+            expression.is_right_expr = true;
+            expression.right_operand = (struct Arithmetic_Expression *) malloc(sizeof(struct Arithmetic_Expression));
+            *((struct Arithmetic_Expression *) (expression.right_operand)) = get_arithmetic_expression(
+                    tokens, i + 1, close_bracket_pos);
+        } else {
+            expression.is_left_expr = true;
+            expression.left_operand = (struct Arithmetic_Expression *) malloc(sizeof(struct Arithmetic_Expression));
+            *((struct Arithmetic_Expression *) (expression.left_operand)) = get_arithmetic_expression(
+                    tokens, i + 1, close_bracket_pos);
+        }
+
+        if (i >= end) {
+            return expression;
+        }
+
+        i = close_bracket_pos + 1;
+
+    } else {
+        if (is_right) {
+            expression.right_operand = (char *) malloc(
+                    strlen(((struct Token*)(tokens[i]))->attributes->text) * sizeof(char));
+            expression.right_operand = ((struct Token*)(tokens[i]))->attributes->text;
+        } else {
+            expression.left_operand = (char *) malloc(
+                    strlen(((struct Token*)(tokens[i]))->attributes->text) * sizeof(char));
+            expression.left_operand = ((struct Token*)(tokens[i]))->attributes->text;
+        }
+        ++i;
+    }
+
+    if (i < end) { // !!!!!!!!!!!!!!!!!!!!!
+        expression.operator = ((struct Token *) (tokens[i]))->attributes->text;
+        ++i;
+        is_right = true;
+        goto _check_operand;
+    }
+
+    return expression;
+}
+
+
+struct Bitwise_Expression get_bitwise_expression(void** tokens, size_t start, size_t end) {
+    size_t i = start;
+    struct Bitwise_Expression expression;
+    bool is_right = false;
+    expression.left_expr = 0;
+    expression.right_expr = 0;
+
+    _check_operand:
+    if (((struct Token *) (tokens[i]))->type == LEFT_ROUND_BRACKET) {
+        size_t close_bracket_pos = find_close_bracket_2(tokens, i, end + 1);
+        size_t temp = i + 1;
+
+        if (is_right) {
+            if (is_arithmetic_expression(tokens, &temp, close_bracket_pos - 1)) {
+                expression.right_operand = (struct Arithmetic_Expression *) malloc(sizeof(struct Arithmetic_Expression));
+                *((struct Arithmetic_Expression *) (expression.right_operand)) = get_arithmetic_expression(
+                        tokens, i + 1, close_bracket_pos);
+                expression.right_expr = 2;
+            } else {
+                expression.right_operand = (struct Bitwise_Expression *) malloc(sizeof(struct Bitwise_Expression));
+                *((struct Bitwise_Expression *) (expression.right_operand)) = get_bitwise_expression(
+                        tokens, i + 1, close_bracket_pos);
+                expression.right_expr = 1;
+            }
+
+        } else {
+            if (is_arithmetic_expression(tokens, &temp, close_bracket_pos - 1)) {
+                expression.left_operand = (struct Arithmetic_Expression *) malloc(sizeof(struct Arithmetic_Expression));
+                *((struct Arithmetic_Expression *) (expression.left_operand)) = get_arithmetic_expression(
+                        tokens, i + 1, close_bracket_pos);
+                expression.left_expr = 2;
+            } else {
+                expression.left_operand = (struct Bitwise_Expression *) malloc(sizeof(struct Bitwise_Expression));
+                *((struct Bitwise_Expression *) (expression.left_operand)) = get_bitwise_expression(
+                        tokens, i + 1, close_bracket_pos);
+                expression.left_expr = 1;
+            }
+        }
+
+        if (i >= end) {
+            return expression;
+        }
+
+        i = close_bracket_pos + 1;
+
+    } else {
+        if (is_right) {
+            expression.right_operand = (char *) malloc(
+                    strlen(((struct Token*)(tokens[i]))->attributes->text) * sizeof(char));
+            expression.right_operand = ((struct Token*)(tokens[i]))->attributes->text;
+            expression.right_expr = 0;
+        } else {
+            expression.left_operand = (char *) malloc(
+                    strlen(((struct Token*)(tokens[i]))->attributes->text) * sizeof(char));
+            expression.left_operand = ((struct Token*)(tokens[i]))->attributes->text;
+            expression.left_expr = 0;
+        }
+        ++i;
+    }
+
+    if (i < end) { // !!!!!!!!!!!!!!!!!!!!!
+        expression.operator = ((struct Token *) (tokens[i]))->attributes->text;
+        ++i;
+        is_right = true;
+        goto _check_operand;
+    }
+
+    return expression;
 }

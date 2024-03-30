@@ -1,5 +1,6 @@
 #include "complex_structures.h"
 
+
 size_t find_close_bracket(void** tokens, size_t start_position, size_t size) {
     for (size_t i = start_position; i < size; ++i) {
         if (((struct Token*)(tokens[i]))->type == RIGHT_ROUND_BRACKET) {
@@ -10,11 +11,11 @@ size_t find_close_bracket(void** tokens, size_t start_position, size_t size) {
 }
 
 
-bool is_arithmetic_expression(void** tokens, size_t* start_position, size_t size) {
+bool is_arithmetic_expression(void** tokens, const size_t* start_position, size_t size) {
     unsigned long long i = *start_position;
 
     _start:
-    if (i == size - 1) {
+    if (i >= size - 1) {
         return true;
     }
 
@@ -43,17 +44,17 @@ bool is_arithmetic_expression(void** tokens, size_t* start_position, size_t size
         }
     }
 
-    _check_operator:
+_check_operator:
     if (((struct Token*)(tokens[i]))->type == ARITHMETIC_OPERATOR) {
         ++i;
         goto _start;
+    } else { // !!!!!!!!!!!!!!!
+        return false;
     }
-
-    return true;
 }
 
 
-bool is_relational_expression(void** tokens, size_t* start_position, size_t size) {
+bool is_relational_expression(void** tokens, const size_t* start_position, size_t size) {
     unsigned long long i = *start_position;
 
     if (((struct Token*)(tokens[i]))->type == LEFT_ROUND_BRACKET) {
@@ -112,7 +113,7 @@ bool is_relational_expression(void** tokens, size_t* start_position, size_t size
 }
 
 
-bool is_logical_expression(void** tokens, size_t* start_position, size_t size) {
+bool is_logical_expression(void** tokens, const size_t* start_position, size_t size) {
     unsigned long long i = *start_position;
 
 _start:
@@ -156,7 +157,7 @@ _check_operator:
 }
 
 
-bool is_bitwise_expression(void** tokens, size_t* start_position, size_t size) {
+bool is_bitwise_expression(void** tokens, const size_t* start_position, size_t size) {
     unsigned long long i = *start_position;
 
     _start:
@@ -172,7 +173,7 @@ bool is_bitwise_expression(void** tokens, size_t* start_position, size_t size) {
         }
         size_t new_start_index = i + 1;
         if (!is_arithmetic_expression(tokens, &new_start_index, close_index)
-            || !is_bitwise_expression(tokens, &new_start_index, close_index)) {
+            && !is_bitwise_expression(tokens, &new_start_index, close_index)) {
             return false;
         }
         i = close_index + 1;
@@ -200,7 +201,7 @@ bool is_bitwise_expression(void** tokens, size_t* start_position, size_t size) {
 }
 
 
-bool is_single_declaration_expression(void** tokens, size_t* start_position, size_t size) {
+bool is_single_declaration_expression(void** tokens, const size_t* start_position, size_t size) {
     size_t i = *start_position;
     if (((struct Token*)(tokens[i]))->type != INT
         && ((struct Token*)(tokens[i]))->type != CHAR
@@ -222,7 +223,7 @@ bool is_single_declaration_expression(void** tokens, size_t* start_position, siz
 }
 
 
-bool is_single_definition_expression(void** tokens, size_t* start_position, size_t size) {
+bool is_single_definition_expression(void** tokens, const size_t* start_position, size_t size) {
     size_t i = *start_position;
     if (((struct Token*)(tokens[i]))->type != INT
         && ((struct Token*)(tokens[i]))->type != CHAR
@@ -254,7 +255,7 @@ _start:
 }
 
 
-bool is_complex_declaration_expression(void** tokens, size_t* start_position, size_t size) {
+bool is_complex_declaration_expression(void** tokens, const size_t* start_position, size_t size) {
     size_t i = *start_position;
     if (((struct Token*)(tokens[i]))->type != INT
         && ((struct Token*)(tokens[i]))->type != CHAR
@@ -284,7 +285,7 @@ bool is_complex_declaration_expression(void** tokens, size_t* start_position, si
 }
 
 
-bool is_complex_definition_expression(void** tokens, size_t* start_position, size_t size) {
+bool is_complex_definition_expression(void** tokens, const size_t* start_position, size_t size) {
     size_t i = *start_position;
     if (((struct Token*)(tokens[i]))->type != INT
         && ((struct Token*)(tokens[i]))->type != CHAR
@@ -321,3 +322,5 @@ _start:
     }
     return false;
 }
+
+
