@@ -76,10 +76,22 @@
 				</MakeCommands>
 			</Target>
 		</Build>
+		<Unit filename="C:/Users/inter/Documents/Projects/C/RISC-V-Cross-compiler/include/codegen/code_generator.h">
+			<Option target="RISC_V_Cross_compiler"/>
+		</Unit>
 		<Unit filename="C:/Users/inter/Documents/Projects/C/RISC-V-Cross-compiler/include/lexer/lexer.h">
 			<Option target="RISC_V_Cross_compiler"/>
 		</Unit>
 		<Unit filename="C:/Users/inter/Documents/Projects/C/RISC-V-Cross-compiler/include/lexer/token.h">
+			<Option target="RISC_V_Cross_compiler"/>
+		</Unit>
+		<Unit filename="C:/Users/inter/Documents/Projects/C/RISC-V-Cross-compiler/include/parser/complex_structures.h">
+			<Option target="RISC_V_Cross_compiler"/>
+		</Unit>
+		<Unit filename="C:/Users/inter/Documents/Projects/C/RISC-V-Cross-compiler/include/parser/parser.h">
+			<Option target="RISC_V_Cross_compiler"/>
+		</Unit>
+		<Unit filename="C:/Users/inter/Documents/Projects/C/RISC-V-Cross-compiler/include/utils/vector.h">
 			<Option target="RISC_V_Cross_compiler"/>
 		</Unit>
 		<Unit filename="C:/Users/inter/Documents/Projects/C/RISC-V-Cross-compiler/main.c">

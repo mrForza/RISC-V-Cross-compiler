@@ -3,23 +3,54 @@
 #include "token.h"
 
 struct Lexer {
-    const char* content;
+    char* content;
     unsigned long long content_length;
-    unsigned long long main_cursor;
-    unsigned long long forward_cursor;
 };
 
 
-struct Lexer init_lexer(const char* content, unsigned long long content_length);
+struct Lexer init_lexer(char* content, unsigned long long content_length);
 
 
-struct Token get_next_token(struct Lexer* lexer);
+struct Vector* get_all_tokens(struct Lexer* lexer);
 
 
-void skip_white_spaces(struct Lexer* lexer);
+struct Token* get_token(char* content, unsigned long long position);
 
 
-void move_cursor(struct Lexer* lexer);
+struct Token* get_number_token(char* content, unsigned long long position);
+
+
+struct Token* determine_hexadecimal_token(char* content, unsigned long long position);
+
+
+struct Token* determine_octal_token(char* content, unsigned long long position);
+
+
+struct Token* determine_binary_token(char* content, unsigned long long position);
+
+
+struct Token* determine_decimal_token(char* content, unsigned long long position);
+
+
+struct Token* determine_real_token(char* content, unsigned long long start_position, unsigned long long position);
+
+
+struct Token* determine_exponential_real_token(char* content, unsigned long long position);
+
+
+struct Token* get_keyword_token(char* content, unsigned long long position);
+
+
+struct Token* get_other_token(char* content, unsigned long long position);
+
+
+struct Token* get_identifier_token(char* content, unsigned long long position);
+
+
+struct Token* get_string_literal_token(char* content, unsigned long long position);
+
+
+struct Token* get_char_literal_token(char* content, unsigned long long position);
 
 
 #endif //RISC_V_CROSS_COMPILER_LEXER_H

@@ -1,0 +1,18 @@
+struct Vector* vector = init_vector(1024, TOKEN);
+push_back_token(vector, init_token(IDENTIFIER, "3", 0, 0, 0));
+push_back_token(vector, init_token(LOGIC_OPERATOR, "<", 0, 0, 0));
+push_back_token(vector, init_token(IDENTIFIER, "8", 0, 0, 0));
+
+
+struct Vector* vector = init_vector(1024, TOKEN);
+push_back_token(vector, init_token(IDENTIFIER, "3", 0, 0, 0));
+push_back_token(vector, init_token(LOGIC_OPERATOR, "<", 0, 0, 0));
+push_back_token(vector, init_token(IDENTIFIER, "(", 0, 0, 0));
+push_back_token(vector, init_token(IDENTIFIER, "3", 0, 0, 0));
+push_back_token(vector, init_token(LOGIC_OPERATOR, "+", 0, 0, 0));
+push_back_token(vector, init_token(IDENTIFIER, "(", 0, 0, 0));
+push_back_token(vector, init_token(IDENTIFIER, "8", 0, 0, 0));
+push_back_token(vector, init_token(LOGIC_OPERATOR, "+", 0, 0, 0));
+push_back_token(vector, init_token(IDENTIFIER, "7", 0, 0, 0));
+push_back_token(vector, init_token(IDENTIFIER, ")", 0, 0, 0));
+push_back_token(vector, init_token(IDENTIFIER, ")", 0, 0, 0));
