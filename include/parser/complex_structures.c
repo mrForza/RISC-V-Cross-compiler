@@ -33,6 +33,16 @@ size_t find_close_curly_bracket(void** tokens, size_t start_position, size_t siz
 }
 
 
+size_t find_nearest_semicolon(void** tokens, size_t start_position, size_t size) {
+    for (size_t i = start_position; i < size; ++i) {
+        if (((struct Token*)(tokens[i]))->type == SEMICOLON) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+
 bool is_arithmetic_expression(void** tokens, const size_t* start_position, size_t size) {
     unsigned long long i = *start_position;
 
@@ -303,6 +313,16 @@ _start:
 }
 
 
+bool is_prefix_expression(void** tokens, const size_t* start_position, size_t size) {
+    return true;
+}
+
+
+bool is_postfix_expression(void** tokens, const size_t* start_position, size_t size) {
+    return true;
+}
+
+
 bool is_if_else_statement(void** tokens, const size_t* start_position, size_t size) {
     size_t i = *start_position;
 
@@ -365,7 +385,7 @@ bool is_while_statement(void** tokens, const size_t* start_position, size_t size
                 i = closed_bracket_index + 1;
                 if (((struct Token*)(tokens[i]))->type == LEFT_CURLY_BRACKET) {
                     size_t closed_curly_bracket_index = find_close_curly_bracket(tokens, i, size);
-                    if (closed_bracket_index != -1) {
+                    if (closed_curly_bracket_index != -1) {
                         return true;
                     }
                     printf("ERROR: Missing curly bracket!");
@@ -384,7 +404,7 @@ bool is_while_statement(void** tokens, const size_t* start_position, size_t size
         }
     }
 
-    return true;
+    return false;
 }
 
 
@@ -417,7 +437,7 @@ _check_while:
                 i = closed_bracket_index + 1;
                 if (((struct Token*)(tokens[i]))->type == LEFT_CURLY_BRACKET) {
                     size_t closed_curly_bracket_index = find_close_curly_bracket(tokens, i, size);
-                    if (closed_bracket_index != -1) {
+                    if (closed_curly_bracket_index != -1) {
                         return true;
                     }
                     printf("ERROR: Missing curly bracket!");
@@ -436,5 +456,55 @@ _check_while:
         }
     }
 
-    return true;
+    return false;
+}
+
+
+bool is_for_statement(void** tokens, const size_t* start_position, size_t size) {
+    size_t i = *start_position;
+
+    if (((struct Token*)(tokens[i]))->type == FOR) {
+        ++i;
+        if (((struct Token*)(tokens[i]))->type == LEFT_ROUND_BRACKET) {
+            size_t closed_bracket_index = find_close_bracket(tokens, i, size);
+            size_t temp = i + 1;
+            size_t semicolon_index = find_nearest_semicolon(tokens, i, closed_bracket_index);
+            if (is_single_definition_expression(tokens, &temp, semicolon_index - 1)) {
+                i = semicolon_index + 1;
+                semicolon_index = find_nearest_semicolon(tokens, i, closed_bracket_index);
+                if (is_relational_expression(tokens, &i, semicolon_index - 1)) {
+                    i = semicolon_index + 1;
+                    if (is_prefix_expression(tokens, &i, closed_bracket_index - 1) ||
+                        is_postfix_expression(tokens, &i, closed_bracket_index - 1)) {
+                        i = closed_bracket_index + 1;
+                        goto _check_curly_brackets;
+                    }
+                    printf("ERROR: No expression in for!");
+                    return false;
+                } else {
+                    printf("ERROR: No condition in for!");
+                    return false;
+                }
+            } else {
+                printf("ERROR: No var initialization in for!");
+                return false;
+            }
+        } else {
+            printf("ERROR: No left round bracket in condition!");
+            return false;
+        }
+    }
+
+_check_curly_brackets:
+    if (((struct Token*)(tokens[i]))->type == LEFT_CURLY_BRACKET) {
+        size_t closed_curly_bracket_index = find_close_curly_bracket(tokens, i, size + 1);
+        if (closed_curly_bracket_index != -1) {
+            return true;
+        }
+        printf("ERROR: Missing curly bracket!");
+        return false;
+    }
+
+    printf("ERROR: Missing curly bracket!");
+    return false;
 }

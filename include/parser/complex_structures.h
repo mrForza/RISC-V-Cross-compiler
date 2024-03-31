@@ -108,3 +108,9 @@ bool is_do_while_statement(void** tokens, const size_t* start_position, size_t s
 
 
 bool is_for_statement(void** tokens, const size_t* start_position, size_t size);
+
+
+bool is_prefix_expression(void** tokens, const size_t* start_position, size_t size);
+
+
+bool is_postfix_expression(void** tokens, const size_t* start_position, size_t size);

@@ -64,7 +64,7 @@ enum Type_Of_Token {
     MULTIPLICATION_SIGN = 60,
     COMMA = 61,
     WHILE = 62,
-    DO = 63
+    DO = 63,
 };
 
 
