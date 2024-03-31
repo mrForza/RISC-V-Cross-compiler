@@ -62,7 +62,9 @@ enum Type_Of_Token {
     SEMICOLON = 58,
     DOUBLE = 59,
     MULTIPLICATION_SIGN = 60,
-    COMMA = 61
+    COMMA = 61,
+    WHILE = 62,
+    DO = 63
 };
 
 

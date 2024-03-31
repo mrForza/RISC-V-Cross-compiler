@@ -14,6 +14,3 @@ char* create_variable_alias(char* varname, int shift);
 
 
 char* generate_assembly_for_arithmetic_expression(struct Arithmetic_Expression expression);
-
-
-char* generate_assembly_for_bitwise_expression(struct Bitwise_Expression expression);

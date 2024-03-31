@@ -2,9 +2,31 @@
 
 
 size_t find_close_bracket(void** tokens, size_t start_position, size_t size) {
+    size_t counter = 0;
     for (size_t i = start_position; i < size; ++i) {
-        if (((struct Token*)(tokens[i]))->type == RIGHT_ROUND_BRACKET) {
-            return i;
+        if (((struct Token*)(tokens[i]))->type == LEFT_ROUND_BRACKET) {
+            ++counter;
+        } else if (((struct Token*)(tokens[i]))->type == RIGHT_ROUND_BRACKET) {
+            --counter;
+            if (counter == 0) {
+                return i;
+            }
+        }
+    }
+    return -1;
+}
+
+
+size_t find_close_curly_bracket(void** tokens, size_t start_position, size_t size) {
+    size_t counter = 0;
+    for (size_t i = start_position; i < size; ++i) {
+        if (((struct Token*)(tokens[i]))->type == LEFT_CURLY_BRACKET) {
+            ++counter;
+        } else if (((struct Token*)(tokens[i]))->type == RIGHT_CURLY_BRACKET) {
+            --counter;
+            if (counter == 0) {
+                return i;
+            }
         }
     }
     return -1;
@@ -20,7 +42,7 @@ bool is_arithmetic_expression(void** tokens, const size_t* start_position, size_
     }
 
     if (((struct Token*)(tokens[i]))->type == LEFT_ROUND_BRACKET) {
-        size_t close_index = find_close_bracket(tokens, i + 1, size);
+        size_t close_index = find_close_bracket(tokens, i, size + 1);
         if (i == -1) {
             printf("Missing a close bracket in %llu column", ((struct Token*)(tokens[i]))->attributes->column);
             return false;
@@ -45,7 +67,8 @@ bool is_arithmetic_expression(void** tokens, const size_t* start_position, size_
     }
 
 _check_operator:
-    if (((struct Token*)(tokens[i]))->type == ARITHMETIC_OPERATOR) {
+    if (((struct Token*)(tokens[i]))->type == ARITHMETIC_OPERATOR ||
+        ((struct Token*)(tokens[i]))->type == BITWISE_OPERATOR) {
         ++i;
         goto _start;
     } else { // !!!!!!!!!!!!!!!
@@ -88,7 +111,7 @@ bool is_relational_expression(void** tokens, const size_t* start_position, size_
     if (((struct Token*)(tokens[i]))->type == LEFT_ROUND_BRACKET) {
         size_t close_index = find_close_bracket(tokens, i + 1, size);
         if (i == -1) {
-            printf("Missing a close bracket in", ((struct Token*)(tokens[i]))->attributes->column);
+            printf("Missing a close bracket in %llu column", ((struct Token*)(tokens[i]))->attributes->column);
             return false;
         }
         size_t new_start_index = i + 1;
@@ -149,50 +172,6 @@ _start:
 
 _check_operator:
     if (((struct Token*)(tokens[i]))->type == LOGIC_OPERATOR) {
-        ++i;
-        goto _start;
-    }
-
-    return true;
-}
-
-
-bool is_bitwise_expression(void** tokens, const size_t* start_position, size_t size) {
-    unsigned long long i = *start_position;
-
-    _start:
-    if (i == size - 1) {
-        return true;
-    }
-
-    if (((struct Token*)(tokens[i]))->type == LEFT_ROUND_BRACKET) {
-        size_t close_index = find_close_bracket(tokens, i + 1, size);
-        if (i == -1) {
-            printf("Missing a close bracket in %llu column", ((struct Token*)(tokens[i]))->attributes->column);
-            return false;
-        }
-        size_t new_start_index = i + 1;
-        if (!is_arithmetic_expression(tokens, &new_start_index, close_index)
-            && !is_bitwise_expression(tokens, &new_start_index, close_index)) {
-            return false;
-        }
-        i = close_index + 1;
-        if (i >= size) {
-            return true;
-        }
-    } else {
-        if (((struct Token*)(tokens[i]))->type == DECIMAL_INTEGER_LITERAL
-            || ((struct Token*)(tokens[i]))->type == DECIMAL_REAL_LITERAL) {
-            if (i == size - 1) {
-                return true;
-            }
-            ++i;
-            goto _check_operator;
-        }
-    }
-
-    _check_operator:
-    if (((struct Token*)(tokens[i]))->type == BITWISE_OPERATOR) {
         ++i;
         goto _start;
     }
@@ -324,3 +303,138 @@ _start:
 }
 
 
+bool is_if_else_statement(void** tokens, const size_t* start_position, size_t size) {
+    size_t i = *start_position;
+
+    if (((struct Token*)(tokens[i]))->type == IF) {
+        ++i;
+    _check_condition_expression:
+        if (((struct Token*)(tokens[i]))->type == LEFT_ROUND_BRACKET) {
+            size_t closed_bracket_index = find_close_bracket(tokens, i, size);
+            size_t temp = i + 1;
+            if (is_relational_expression(tokens, &temp, closed_bracket_index - 1)) {
+                i = closed_bracket_index + 1;
+                if (((struct Token*)(tokens[i]))->type == LEFT_CURLY_BRACKET) {
+                    size_t closed_curly_bracket_index = find_close_curly_bracket(tokens, i, size);
+                    i = closed_curly_bracket_index + 1;
+                    goto _check_another_branches;
+                } else {
+                    printf("ERROR: Missing curly bracket!");
+                    return false;
+                }
+            } else {
+                printf("ERROR: Incorrect conditional expression!");
+                return false;
+            }
+        } else{
+            printf("ERROR: No left round bracket in condition!");
+            return false;
+        }
+    }
+
+_check_another_branches:
+    if (((struct Token*)(tokens[i]))->type == ELSE) {
+        ++i;
+        if (((struct Token*)(tokens[i]))->type == IF) {
+            ++i;
+            goto _check_condition_expression;
+        } else {
+            if (((struct Token*)(tokens[i]))->type == LEFT_CURLY_BRACKET) {
+                size_t closed_curly_bracket_index = find_close_curly_bracket(tokens, i, size);
+                i = closed_curly_bracket_index + 1;
+            } else {
+                printf("ERROR: Missing curly bracket!");
+                return false;
+            }
+        }
+    }
+
+    return true;
+}
+
+
+bool is_while_statement(void** tokens, const size_t* start_position, size_t size) {
+    size_t i = *start_position;
+
+    if (((struct Token*)(tokens[i]))->type == WHILE) {
+        ++i;
+        if (((struct Token*)(tokens[i]))->type == LEFT_ROUND_BRACKET) {
+            size_t closed_bracket_index = find_close_bracket(tokens, i, size);
+            size_t temp = i + 1;
+            if (is_relational_expression(tokens, &temp, closed_bracket_index - 1)) {
+                i = closed_bracket_index + 1;
+                if (((struct Token*)(tokens[i]))->type == LEFT_CURLY_BRACKET) {
+                    size_t closed_curly_bracket_index = find_close_curly_bracket(tokens, i, size);
+                    if (closed_bracket_index != -1) {
+                        return true;
+                    }
+                    printf("ERROR: Missing curly bracket!");
+                    return false;
+                } else {
+                    printf("ERROR: Missing curly bracket!");
+                    return false;
+                }
+            } else {
+                printf("ERROR: Incorrect conditional expression!");
+                return false;
+            }
+        } else {
+            printf("ERROR: No left round bracket in condition!");
+            return false;
+        }
+    }
+
+    return true;
+}
+
+
+bool is_do_while_statement(void** tokens, const size_t* start_position, size_t size) {
+    size_t i = *start_position;
+
+    if (((struct Token*)(tokens[i]))->type == DO) {
+        ++i;
+        if (((struct Token*)(tokens[i]))->type == LEFT_CURLY_BRACKET) {
+            size_t closed_curly_bracket_index = find_close_curly_bracket(tokens, i, size);
+            if (closed_curly_bracket_index == -1) {
+                printf("ERROR: Missing curly bracket!");
+                return false;
+            }
+            i = closed_curly_bracket_index + 1;
+            goto _check_while;
+        } else {
+            printf("ERROR: Missing curly bracket!");
+            return false;
+        }
+    }
+
+_check_while:
+    if (((struct Token*)(tokens[i]))->type == WHILE) {
+        ++i;
+        if (((struct Token*)(tokens[i]))->type == LEFT_ROUND_BRACKET) {
+            size_t closed_bracket_index = find_close_bracket(tokens, i, size);
+            size_t temp = i + 1;
+            if (is_relational_expression(tokens, &temp, closed_bracket_index - 1)) {
+                i = closed_bracket_index + 1;
+                if (((struct Token*)(tokens[i]))->type == LEFT_CURLY_BRACKET) {
+                    size_t closed_curly_bracket_index = find_close_curly_bracket(tokens, i, size);
+                    if (closed_bracket_index != -1) {
+                        return true;
+                    }
+                    printf("ERROR: Missing curly bracket!");
+                    return false;
+                } else {
+                    printf("ERROR: Missing curly bracket!");
+                    return false;
+                }
+            } else {
+                printf("ERROR: Incorrect conditional expression!");
+                return false;
+            }
+        } else {
+            printf("ERROR: No left round bracket in condition!");
+            return false;
+        }
+    }
+
+    return true;
+}
