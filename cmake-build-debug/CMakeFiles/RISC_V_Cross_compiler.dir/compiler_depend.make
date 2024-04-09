@@ -35,16 +35,17 @@ CMakeFiles/RISC_V_Cross_compiler.dir/main.c.obj: C:/Users/inter/Documents/Projec
   C:/Users/inter/Documents/Projects/C/RISC-V-Cross-compiler/include/file_handler/file_validator.h \
   C:/Users/inter/Documents/Projects/C/RISC-V-Cross-compiler/include/parser/parser.c \
   C:/Users/inter/Documents/Projects/C/RISC-V-Cross-compiler/include/parser/parser.h \
-  C:/Users/inter/Documents/Projects/C/RISC-V-Cross-compiler/include/parser/complex_structures.c \
-  C:/Users/inter/Documents/Projects/C/RISC-V-Cross-compiler/include/parser/complex_structures.h \
-  C:/Users/inter/Documents/Projects/C/RISC-V-Cross-compiler/include/lexer/token.h \
   C:/Users/inter/Documents/Projects/C/RISC-V-Cross-compiler/include/lexer/lexer.c \
   C:/Users/inter/Documents/Projects/C/RISC-V-Cross-compiler/include/lexer/lexer.h \
   C:/Users/inter/Documents/Projects/C/RISC-V-Cross-compiler/include/lexer/token.h \
   C:/Users/inter/Documents/Projects/C/RISC-V-Cross-compiler/include/utils/vector.c \
   C:/Users/inter/Documents/Projects/C/RISC-V-Cross-compiler/include/utils/vector.h \
   C:/Users/inter/Documents/Projects/C/RISC-V-Cross-compiler/include/lexer/token.c \
-  C:/Users/inter/Documents/Projects/C/RISC-V-Cross-compiler/include/utils.c
+  C:/Users/inter/Documents/Projects/C/RISC-V-Cross-compiler/include/utils.c \
+  C:/Users/inter/Documents/Projects/C/RISC-V-Cross-compiler/include/parser/syntax_analyzer.c \
+  C:/Users/inter/Documents/Projects/C/RISC-V-Cross-compiler/include/parser/syntax_analyzer.h \
+  C:/Users/inter/Documents/Projects/C/RISC-V-Cross-compiler/include/lexer/token.h \
+  C:/Users/inter/Documents/Projects/C/RISC-V-Cross-compiler/include/parser/complex_structures.c
 
 
 C:/Users/inter/Documents/Projects/C/RISC-V-Cross-compiler/main.c:
@@ -79,6 +80,8 @@ C:/Programs/Programming/CLion/CLion\ 2023.1.2/bin/mingw/x86_64-w64-mingw32/inclu
 
 C:/Programs/Programming/CLion/CLion\ 2023.1.2/bin/mingw/x86_64-w64-mingw32/include/_mingw_off_t.h:
 
+C:/Users/inter/Documents/Projects/C/RISC-V-Cross-compiler/include/parser/syntax_analyzer.c:
+
 C:/Programs/Programming/CLion/CLion\ 2023.1.2/bin/mingw/x86_64-w64-mingw32/include/swprintf.inl:
 
 C:/Users/inter/Documents/Projects/C/RISC-V-Cross-compiler/include/utils.c:
@@ -96,8 +99,6 @@ C:/Programs/Programming/CLion/CLion\ 2023.1.2/bin/mingw/lib/gcc/x86_64-w64-mingw
 C:/Users/inter/Documents/Projects/C/RISC-V-Cross-compiler/include/file_handler/file_handler.c:
 
 C:/Users/inter/Documents/Projects/C/RISC-V-Cross-compiler/include/file_handler/file_handler.h:
-
-C:/Users/inter/Documents/Projects/C/RISC-V-Cross-compiler/include/parser/complex_structures.h:
 
 C:/Users/inter/Documents/Projects/C/RISC-V-Cross-compiler/include/parser/parser.h:
 
@@ -130,3 +131,5 @@ C:/Users/inter/Documents/Projects/C/RISC-V-Cross-compiler/include/preprocessor/p
 C:/Users/inter/Documents/Projects/C/RISC-V-Cross-compiler/include/lexer/lexer.h:
 
 C:/Users/inter/Documents/Projects/C/RISC-V-Cross-compiler/include/lexer/token.c:
+
+C:/Users/inter/Documents/Projects/C/RISC-V-Cross-compiler/include/parser/syntax_analyzer.h:

@@ -153,6 +153,11 @@ void print_all_tokens(struct Vector* tokens) {
 void print_syntax_constructions(struct Grammar* grammars, size_t size) {
     printf("\n");
     for (size_t i = 0; i < size; ++i) {
+        struct If_Else if_else_statement;
+        struct While while_statement;
+        struct Do_While do_while_statement;
+        struct For for_statement;
+
         switch (grammars[i].type) {
             case SINGLE_DECLARATION:
                 printf("SINGLE_DECLARATION\n");
@@ -176,7 +181,11 @@ void print_syntax_constructions(struct Grammar* grammars, size_t size) {
                 printf("RELATIONAL_EXPRESSION\n");
                 break;
             case IF_ELSE_STATEMENT:
-
+                if_else_statement = *((struct If_Else*)grammars[i].data);
+                for (int j = 0; j < if_else_statement.quantity_of_conditions; ++j) {
+                    printf("LOGIC_EXPRESSION");
+                    print_syntax_constructions(if_else_statement.bodies, 1);
+                }
                 printf("IF_ELSE_STATEMENT\n");
                 break;
             case DO_WHILE_STATEMENT:

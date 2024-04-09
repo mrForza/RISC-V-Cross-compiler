@@ -12,4 +12,4 @@ add_executable(
         include/codegen/code_generator.h
         include/parser/complex_structures.h
         include/parser/parser.h
-)
+        include/parser/syntax_analyzer.h)

@@ -1,4 +1,6 @@
 #include "parser.h"
+#include "syntax_analyzer.c"
+#include "complex_structures.c"
 
 
 struct Parser init_parser(struct Lexer* lexer) {
@@ -464,8 +466,10 @@ _check_if_else:
         ++bodies_quantity;
     }
 
-    printf("Count of conditions: %llu", conditions_quantity);
-    printf("Count of bodies: %llu", bodies_quantity);
+    printf("Count of conditions: %d", conditions_quantity);
+    printf("Count of bodies: %d", bodies_quantity);
+    if_else_statement.quantity_of_conditions = conditions_quantity;
+    if_else_statement.quantity_of_bodies = bodies_quantity;
     if_else_statement.conditions = malloc(conditions_quantity * sizeof(void*));
     if_else_statement.bodies = malloc(bodies_quantity * sizeof(void*));
 
