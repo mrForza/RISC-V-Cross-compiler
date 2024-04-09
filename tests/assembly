@@ -1,0 +1,49 @@
+li t0, 3
+sw t0, (sp)
+addi sp, sp, -4
+addi, sp, sp, 4
+lw t0, (sp)
+li t1, 12
+and t0, t0, t1
+sw t0, (sp)
+addi, sp, sp, -4
+li t0, 0
+li t1, 0
+addi, sp, sp, 4
+lw t0, (sp)
+li t1, 1
+add t0, t0, t1
+sw t0, (sp)
+addi, sp, sp, -4
+li t0, 0
+li t1, 0
+addi, sp, sp, 4
+lw t0, (sp)
+li t1, 8
+mul t0, t0, t1
+sw t0, (sp)
+addi, sp, sp, -4
+li t0, 0
+li t1, 0
+li t0, 7
+sw t0, (sp)
+addi sp, sp, -4
+addi, sp, sp, 4
+lw t0, (sp)
+li t1, 6
+add t0, t0, t1
+sw t0, (sp)
+addi, sp, sp, -4
+li t0, 0
+li t1, 0
+addi, sp, sp, 4
+lw t1, (sp)
+sw, t6, (sp)
+addi, sp, sp, 4
+lw t0, (sp)
+sw, t6, (sp)
+or t0, t0, t1
+sw t0, (sp)
+addi, sp, sp, -4
+li t0, 0
+li t1, 0

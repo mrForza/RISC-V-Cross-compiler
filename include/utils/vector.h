@@ -4,7 +4,7 @@
 
 
 enum Type_Of_Items {
-    INT,
+    NUMBER,
     TOKEN,
     GRAMMAR
 };
@@ -22,6 +22,9 @@ struct Vector* init_vector(unsigned long long capacity, enum Type_Of_Items);
 
 
 void push_back_token(struct Vector* vector, struct Token* token);
+
+
+void push_back_integer(struct Vector* vector, size_t number);
 
 
 void destroy_vector(struct Vector* vector);

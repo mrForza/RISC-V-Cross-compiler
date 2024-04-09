@@ -13,7 +13,7 @@ struct Lexer init_lexer(char* content, unsigned long long content_length) {
 
 
 struct Vector* get_all_tokens(struct Lexer* lexer) {
-    struct Vector* vector = init_vector(256, TOKEN);
+    struct Vector* vector = init_vector(1024, TOKEN);
     struct Token* current_token;
     unsigned long long position = 0;
     do {
@@ -29,13 +29,30 @@ struct Vector* get_all_tokens(struct Lexer* lexer) {
 }
 
 
+struct Token* get_semicolon_token(char* content, unsigned long long position) {
+    unsigned long long start_position = position;
+    char* lexeme_text = get_substring(content, start_position, start_position);
+    return init_token(
+            SEMICOLON,
+            lexeme_text,
+            strlen(lexeme_text),
+            0, // MUST BE IMPLEMENTED
+            start_position);
+}
+
+
 struct Token* get_token(char* content, unsigned long long position) {
-    struct Token* token;
-    if (content[position] <= 32) {
-        token = (struct Token*)malloc(sizeof(struct Token));
+    struct Token *token;
+    if (content[position] < 32 && content[position] != 10 && content[position] != 9) {
+        token = (struct Token *) malloc(sizeof(struct Token));
         token->type = END;
-        token->attributes = (struct Token_Attributes*)malloc(sizeof(struct Token_Attributes));
+        token->attributes = (struct Token_Attributes *) malloc(sizeof(struct Token_Attributes));
         return token;
+    }
+
+    if (content[position] == ';') {
+        token = get_semicolon_token(content, position);
+        goto _end;
     }
 
     if (48 <= content[position] && content[position] <= 57) {
@@ -54,6 +71,7 @@ struct Token* get_token(char* content, unsigned long long position) {
         }
     }
 
+_end:
     return token;
 }
 
@@ -78,15 +96,14 @@ struct Token* get_number_token(char* content, unsigned long long position) {
 struct Token* determine_hexadecimal_token(char* content, unsigned long long position) {
     unsigned long long start_position = position;
     position += 2;
-    while (
-            (48 <= content[position] && content[position] <= 57)
-            || (65 <= content[position] && content[position] <= 70)
-            || (97 <= content[position] && content[position] <= 102)) {
+    while ((48 <= content[position] && content[position] <= 55) ||
+            (65 <= content[position] && content[position] <= 70) ||
+            (97 <= content[position] && content[position] <= 102)) {
         ++position;
     }
     char* lexeme_text = get_substring(content, start_position, position - 1);
     return init_token(
-            HEXADECIMAL_INTEGER_LITERAL,
+            HEX_INT_LITERAL,
             lexeme_text,
             strlen(lexeme_text),
             0, // MUST BE IMPLEMENTED
@@ -102,7 +119,7 @@ struct Token* determine_octal_token(char* content, unsigned long long position) 
     }
     char* lexeme_text = get_substring(content, start_position, position - 1);
     return init_token(
-            OCTAL_INTEGER_LITERAL,
+            OCTAL_INT_LITERAL,
             lexeme_text,
             strlen(lexeme_text),
             0, // MUST BE IMPLEMENTED
@@ -118,7 +135,7 @@ struct Token* determine_binary_token(char* content, unsigned long long position)
     }
     char* lexeme_text = get_substring(content, start_position, position - 1);
     return init_token(
-            BINARY_INTEGER_LITERAL,
+            BINARY_INT_LITERAL,
             lexeme_text,
             strlen(lexeme_text),
             0, // MUST BE IMPLEMENTED
@@ -128,20 +145,17 @@ struct Token* determine_binary_token(char* content, unsigned long long position)
 
 struct Token* determine_decimal_token(char* content, unsigned long long position) {
     unsigned long long start_position = position;
-    position += 2;
+    position += 1; // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     while (48 <= content[position] && content[position] <= 57) {
         ++position;
     }
 
     if (content[position] == '.') {
         return determine_real_token(content, start_position, position);
-    } else if (content[position] == 'e' || content[position] == 'E') {
-        // MUST BE IMPLEMENTED!
-        return determine_exponential_real_token(content, position);
     } else {
         char* lexeme_text = get_substring(content, start_position, position - 1);
         return init_token(
-                DECIMAL_INTEGER_LITERAL,
+                DECIMAL_INT_LITERAL,
                 lexeme_text,
                 strlen(lexeme_text),
                 0, // MUST BE IMPLEMENTED
@@ -157,16 +171,11 @@ struct Token* determine_real_token(char* content, unsigned long long start_posit
     }
     char* lexeme_text = get_substring(content, start_position, position - 1);
     return init_token(
-            DECIMAL_REAL_LITERAL,
+            DOUBLE_LITERAL,
             lexeme_text,
             strlen(lexeme_text),
             0, // MUST BE IMPLEMENTED
             start_position);
-}
-
-
-struct Token* determine_exponential_real_token(char* content, unsigned long long position) {
-
 }
 
 
@@ -202,7 +211,7 @@ struct Token* get_char_literal_token(char* content, unsigned long long position)
                 );
     }
     return init_token(
-            SYMBOL_LITERAL,
+            CHAR_LITERAL,
             lexeme_text,
             strlen(lexeme_text),
             0,
@@ -252,7 +261,7 @@ struct Token* get_b_start_keyword_token(char* content, unsigned long long positi
 
     if (is_keyword) {
         return init_token(
-                LOOP,
+                BREAK,
                 substring,
                 strlen(substring),
                 0,
@@ -282,7 +291,7 @@ struct Token* get_c_start_keyword_token(char* content, unsigned long long positi
         return token;
     }
 
-    token = get_current_keyword(content, start_position, "continue", TRANSITION_INTERRUPT_OPERATOR);
+    token = get_current_keyword(content, start_position, "continue", CONTINUE);
     if (token->type != INCORRECT) {
         return token;
     }
@@ -307,7 +316,7 @@ struct Token* get_do_keyword(char* content, unsigned long long position) {
     char sym = content[2];
     if (is_keyword && content[start_position + 2] != 'u') {
         return init_token(
-                LOOP,
+                DO,
                 substring,
                 strlen(substring),
                 0,
@@ -333,7 +342,7 @@ struct Token* get_double_keyword(char* content, unsigned long long position) {
 
     if (is_keyword) {
         return init_token(
-                REAL_DATA_TYPE,
+                DOUBLE,
                 substring,
                 strlen(substring),
                 0,
@@ -359,7 +368,7 @@ struct Token* get_default_keyword(char* content, unsigned long long position) {
 
     if (is_keyword) {
         return init_token(
-                CONDITIONAL_OPERATOR,
+                DEFAULT,
                 substring,
                 strlen(substring),
                 0,
@@ -397,11 +406,6 @@ struct Token* get_e_start_keyword_token(char* content, unsigned long long positi
     struct Token* token;
     unsigned long long start_position = position;
 
-    token = get_current_keyword(content, start_position, "enum", ENUM);
-    if (token->type != INCORRECT) {
-        return token;
-    }
-
     token = get_current_keyword(content, start_position, "else", ELSE);
     if (token->type != INCORRECT) {
         return token;
@@ -420,38 +424,7 @@ struct Token* get_f_start_keyword_token(char* content, unsigned long long positi
         return token;
     }
 
-    token = get_current_keyword(content, start_position, "float", FLOAT);
-    if (token->type != INCORRECT) {
-        return token;
-    }
-
     return get_identifier_token(content, position);
-}
-
-
-struct Token* get_goto_keyword(char* content, unsigned long long position) {
-    unsigned long long start_position = position;
-    char* substring = get_substring(content, position, position + 3);
-    char* keyword = "goto";
-    bool is_keyword = true;
-
-    for (unsigned long long i = 0; i < 4; ++i) {
-        if (substring[i] != keyword[i]) {
-            is_keyword = false;
-            break;
-        }
-    }
-
-    if (is_keyword) {
-        return init_token(
-                TRANSITION_INTERRUPT_OPERATOR,
-                substring,
-                strlen(substring),
-                0,
-                start_position);
-    }
-
-    return get_identifier_token(content, start_position);
 }
 
 
@@ -464,38 +437,12 @@ struct Token* get_i_start_keyword_token(char* content, unsigned long long positi
         return token;
     }
 
-    token = get_current_keyword(content, position, "int", INTEGER);
+    token = get_current_keyword(content, position, "int", INT);
     if (token->type != INCORRECT) {
         return token;
     }
 
     return get_identifier_token(content, position);
-}
-
-
-struct Token* get_long_keyword(char* content, unsigned long long position) {
-    unsigned long long start_position = position;
-    char* substring = get_substring(content, position, position + 3);
-    char* keyword = "long";
-    bool is_keyword = true;
-
-    for (unsigned long long i = 0; i < 4; ++i) {
-        if (substring[i] != keyword[i]) {
-            is_keyword = false;
-            break;
-        }
-    }
-
-    if (is_keyword) {
-        return init_token(
-                INTEGER_DATA_TYPE,
-                substring,
-                strlen(substring),
-                0,
-                start_position);
-    }
-
-    return get_identifier_token(content, start_position);
 }
 
 
@@ -514,33 +461,7 @@ struct Token* get_return_keyword(char* content, unsigned long long position) {
 
     if (is_keyword) {
         return init_token(
-                TRANSITION_INTERRUPT_OPERATOR,
-                substring,
-                strlen(substring),
-                0,
-                start_position);
-    }
-
-    return get_identifier_token(content, start_position);
-}
-
-
-struct Token* get_typedef_keyword(char* content, unsigned long long position) {
-    unsigned long long start_position = position;
-    char* substring = get_substring(content, position, position + 6);
-    char* keyword = "typedef";
-    bool is_keyword = true;
-
-    for (unsigned long long i = 0; i < 7; ++i) {
-        if (substring[i] != keyword[i]) {
-            is_keyword = false;
-            break;
-        }
-    }
-
-    if (is_keyword) {
-        return init_token(
-                TYPEDEF,
+                RETURN,
                 substring,
                 strlen(substring),
                 0,
@@ -592,7 +513,7 @@ struct Token* get_while_keyword(char* content, unsigned long long position) {
 
     if (is_keyword) {
         return init_token(
-                LOOP,
+                WHILE,
                 substring,
                 strlen(substring),
                 0,
@@ -603,53 +524,11 @@ struct Token* get_while_keyword(char* content, unsigned long long position) {
 }
 
 
-struct Token* get_u_start_keyword_token(char* content, unsigned long long position) {
-    struct Token* token;
-
-    token = get_current_keyword(content, position, "union", UNION);
-    if (token->type != INCORRECT) {
-        return token;
-    }
-
-    token = get_current_keyword(content, position, "unsigned", UNSIGNED);
-    if (token->type != INCORRECT) {
-        return token;
-    }
-
-    return get_identifier_token(content, position);
-}
-
-
 struct Token* get_s_start_keyword_token(char* content, unsigned long long position) {
     struct Token* token;
     unsigned long long start_position = position;
 
     token = get_current_keyword(content, position, "switch", SWITCH);
-    if (token->type != INCORRECT) {
-        return token;
-    }
-
-    token = get_current_keyword(content, position, "signed", SIGNED);
-    if (token->type != INCORRECT) {
-        return token;
-    }
-
-    token = get_current_keyword(content, position, "static", STATIC);
-    if (token->type != INCORRECT) {
-        return token;
-    }
-
-    token = get_current_keyword(content, position, "struct", STRUCT);
-    if (token->type != INCORRECT) {
-        return token;
-    }
-
-    token = get_current_keyword(content, position, "short", SHORT);
-    if (token->type != INCORRECT) {
-        return token;
-    }
-
-    token = get_current_keyword(content, position, "sizeof", SIZEOF);
     if (token->type != INCORRECT) {
         return token;
     }
@@ -672,20 +551,12 @@ struct Token* get_keyword_token(char* content, unsigned long long position) {
             return get_e_start_keyword_token(content, position);
         case 'f':
             return get_f_start_keyword_token(content, position);
-        case 'g':
-            return get_goto_keyword(content, position);
         case 'i':
             return get_i_start_keyword_token(content, position);
-        case 'l':
-            return get_long_keyword(content, position);
         case 'r':
             return get_return_keyword(content, position);
         case 's':
             return get_s_start_keyword_token(content, position);
-        case 't':
-            return get_typedef_keyword(content, position);
-        case 'u':
-            return get_u_start_keyword_token(content, position);
         case 'v':
             return get_void_keyword(content, position);
         case 'w':
@@ -717,12 +588,6 @@ struct Token* get_brackets_token(char* content, unsigned long long position) {
         case '}':
             type = RIGHT_CURLY_BRACKET;
             break;
-        case '<':
-            type = LEFT_TRIANGLE_BRACKET;
-            break;
-        case '>':
-            type = RIGHT_TRIANGLE_BRACKET;
-            break;
         default:
             type = INCORRECT;
             break;
@@ -733,29 +598,56 @@ struct Token* get_brackets_token(char* content, unsigned long long position) {
 
 
 struct Token* get_assignment_token(char* content, unsigned long long position) {
-    enum Type_Of_Token type;
+    enum Type_Of_Token type = ASSIGN_OPERATOR;
     char symbols[] = {'+', '-', '*', '/', '%', '|', '&', '~'};
     bool is_correct = false;
+
     if (content[position + 1] == '=') {
         for (int i = 0; i < 8; ++i) {
             if (content[position] == symbols[i]) {
                 is_correct = true;
             }
         }
-    }
-    if (is_correct) {
-        type = COMPLEX_ASSIGN_OPERATOR;
+
+        if (is_correct) {
+            type = ARITHMETIC_ASSIGN_OPERATOR;
+        } else {
+            type = INCORRECT;
+        }
     } else {
-        type = INCORRECT;
+        if (content[position] == '=') {
+            type = ASSIGN_OPERATOR;
+            char* lexeme_text = get_substring(content, position, position);
+            return init_token(type, lexeme_text, 1, 0, position);
+        }
     }
     char* lexeme_text = get_substring(content, position, position + 1);
     return init_token(type, lexeme_text, 2, 0, position);
 }
 
 
+struct Token* get_bitwise_token(char* content, size_t position) {
+    enum Type_Of_Token type;
+    char symbols[] = {'|', '&', '~'};
+    bool is_correct = false;
+    for (int i = 0; i < 3; ++i) {
+        if (content[position] == symbols[i]) {
+            is_correct = true;
+        }
+    }
+    if (is_correct) {
+        type = BITWISE_OPERATOR;
+    } else {
+        type = INCORRECT;
+    }
+    char* lexeme_text = get_substring(content, position, position);
+    return init_token(type, lexeme_text, 1, 0, position);
+}
+
+
 struct Token* get_arithmetic_token(char* content, unsigned long long position) {
     enum Type_Of_Token type;
-    char symbols[] = {'+', '-', '*', '/', '%', '|', '&', '~'};
+    char symbols[] = {'+', '-', '*', '/', '%'};
     bool is_correct = false;
     for (int i = 0; i < 8; ++i) {
         if (content[position] == symbols[i]) {
@@ -780,9 +672,27 @@ struct Token* get_arithmetic_token(char* content, unsigned long long position) {
 
 struct Token* get_comparison_token(char* content, unsigned long long position) {
     enum Type_Of_Token type;
-    if ((content[position] == '=' || content[position] == '!' || content[position] == '<' || content[position] == '>')
-        && content[position + 1] == '=') {
+    if (content[position] == '<' || content[position] == '>') {
         type = COMPARISON_OPERATOR;
+    } else {
+        if ((content[position] == '=' || content[position] == '!' || content[position] == '<' || content[position] == '>')
+            && content[position + 1] == '=') {
+            type = COMPARISON_OPERATOR;
+        } else {
+            type = INCORRECT;
+        }
+    }
+
+    char* lexeme_text = get_substring(content, position, position + 1);
+    return init_token(type, lexeme_text, 2, 0, position);
+}
+
+
+struct Token* get_logic_token(char* content, unsigned long long position) {
+    enum Type_Of_Token type;
+    if ((content[position] == '&' && content[position + 1] == '&')
+        || (content[position] == '|' && content[position + 1] == '|')) {
+        type = LOGIC_OPERATOR;
     } else {
         type = INCORRECT;
     }
@@ -800,7 +710,7 @@ struct Token* get_other_token(char* content, unsigned long long position) {
         return token;
     }
 
-    token = get_assignment_token(content, position);
+    token = get_logic_token(content, position);
     if (token->type != INCORRECT) {
         return token;
     }
@@ -810,7 +720,17 @@ struct Token* get_other_token(char* content, unsigned long long position) {
         return token;
     }
 
-    return get_arithmetic_token(content, position);
+    token = get_bitwise_token(content, position);
+    if (token->type != INCORRECT) {
+        return token;
+    }
+
+    token = get_arithmetic_token(content, position);
+    if (token->type != INCORRECT) {
+        return token;
+    }
+
+    return get_assignment_token(content, position);
 }
 
 

@@ -1,3 +1,6 @@
+#include "../parser/complex_structures.c"
+
+
 char* generate_assembly_for_var_declaration(char* type, char* var_name);
 
 

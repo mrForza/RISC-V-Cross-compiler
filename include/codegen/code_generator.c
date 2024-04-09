@@ -1,7 +1,5 @@
-#include "code_generator.h"
 #include "string.h"
 #include "stdio.h"
-
 
 int stack_pointer = 0x7fffeffc;
 
