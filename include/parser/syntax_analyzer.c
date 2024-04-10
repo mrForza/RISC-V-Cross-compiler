@@ -69,7 +69,8 @@ bool is_arithmetic_expression(void** tokens, const int* start_position, int size
         }
     } else {
         if (((struct Token*)(tokens[i]))->type == DOUBLE_LITERAL
-            || ((struct Token*)(tokens[i]))->type == DECIMAL_INT_LITERAL) {
+            || ((struct Token*)(tokens[i]))->type == DECIMAL_INT_LITERAL
+            || ((struct Token*)(tokens[i]))->type == IDENTIFIER) {
             if (i == size - 1) {
                 return true;
             }
@@ -114,7 +115,8 @@ bool is_relational_expression(void** tokens, const int* start_position, int size
         }
     } else {
         if (((struct Token*)(tokens[i]))->type == DOUBLE_LITERAL ||
-            ((struct Token*)(tokens[i]))->type == DECIMAL_INT_LITERAL) {
+            ((struct Token*)(tokens[i]))->type == DECIMAL_INT_LITERAL ||
+            ((struct Token*)(tokens[i]))->type == IDENTIFIER) {
             if (i == size - 1) {
                 return true;
             }
@@ -141,8 +143,9 @@ bool is_relational_expression(void** tokens, const int* start_position, int size
             return true;
         }
     } else {
-        if (((struct Token*)(tokens[i]))->type == DOUBLE ||
-            ((struct Token*)(tokens[i]))->type == DECIMAL_INT_LITERAL) {
+        if (((struct Token*)(tokens[i]))->type == DOUBLE_LITERAL || // ?????
+            ((struct Token*)(tokens[i]))->type == DECIMAL_INT_LITERAL ||
+            ((struct Token*)(tokens[i]))->type == IDENTIFIER) {
             if (i == size - 1) {
                 return true;
             }
@@ -229,7 +232,7 @@ bool is_single_definition_expression(void** tokens, const int* start_position, i
     }
     ++i;
 
-    _additional_check:
+_additional_check:
     if ((((struct Token*)(tokens[i - 1]))->type == INT ||
          ((struct Token*)(tokens[i - 1]))->type == CHAR) &&
         ((struct Token*)(tokens[i + 2]))->type == DOUBLE_LITERAL) {
@@ -237,7 +240,7 @@ bool is_single_definition_expression(void** tokens, const int* start_position, i
         return false;
     }
 
-    _start:
+_start:
     if (((struct Token*)(tokens[i]))->type == IDENTIFIER) {
         ++i;
         if (((struct Token*)(tokens[i]))->type == ASSIGN_OPERATOR) {
@@ -248,7 +251,8 @@ bool is_single_definition_expression(void** tokens, const int* start_position, i
                 if (((struct Token*)(tokens[i]))->type == DOUBLE_LITERAL
                     || ((struct Token*)(tokens[i]))->type == DECIMAL_INT_LITERAL
                     || ((struct Token*)(tokens[i]))->type == STRING_LITERAL
-                    || ((struct Token*)(tokens[i]))->type == CHAR_LITERAL) {
+                    || ((struct Token*)(tokens[i]))->type == CHAR_LITERAL
+                    || ((struct Token*)(tokens[i]))->type == IDENTIFIER) {
                     return true;
                 }
             }
@@ -312,7 +316,8 @@ bool is_complex_definition_expression(void** tokens, const int* start_position, 
             if (((struct Token*)(tokens[i]))->type == DOUBLE_LITERAL
                 || ((struct Token*)(tokens[i]))->type == DECIMAL_INT_LITERAL
                 || ((struct Token*)(tokens[i]))->type == STRING_LITERAL
-                || ((struct Token*)(tokens[i]))->type == CHAR_LITERAL) {
+                || ((struct Token*)(tokens[i]))->type == CHAR_LITERAL
+               || ((struct Token*)(tokens[i]))->type == IDENTIFIER) {
                 if (i == size - 1) {
                     return true;
                 }

@@ -1,3 +1,4 @@
+#pragma once
 #include "stdlib.h"
 #include "string.h"
 
@@ -38,5 +39,14 @@ char* concatenate_string_int(const char* string, unsigned long long number) {
     char* result_string = (char*)malloc(strlen(string) + strlen(number_representation) + 1);
     strcpy(result_string, string);
     strcat(result_string, number_representation);
+    return result_string;
+}
+
+
+char* multiply_string(char* string, int quantity) {
+    char* result_string = (char*)malloc(quantity * sizeof(strlen(string)));
+    for (int i = 0; i < quantity; ++i) {
+        result_string = concatenate(result_string, string);
+    }
     return result_string;
 }

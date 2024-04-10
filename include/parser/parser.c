@@ -101,9 +101,23 @@ int get_last_syntax_position(void** tokens, int start, int end) {
 }
 
 
+int get_quantity_of_variables(struct Grammar* grammars, int size) {
+    int quantity_of_variables = 0;
+    for (int i = 0; i < size; ++i) {
+        if (grammars[i].type == SINGLE_DEFINITION) {
+            ++quantity_of_variables;
+        } else if (grammars[i].type == COMPLEX_DEFINITION) {
+            quantity_of_variables += ((struct Complex_Definition*)(grammars[i].data))->quantity_of_variables;
+        }
+    }
+
+    return quantity_of_variables;
+}
+
+
 struct Grammar* get_intermediate_representation_for_scope(void** tokens, int start, int end, int* quantity_of_grammars) {
     int i = start;
-    struct Grammar* grammars = malloc(128 * sizeof(struct Grammar*));
+    struct Grammar* grammars = malloc(1024 * sizeof(struct Grammar*));
     int grammars_index = 0;
     while (i < end - 1) {
         ++(*quantity_of_grammars);
@@ -145,7 +159,7 @@ struct Grammar* get_intermediate_representation_for_scope(void** tokens, int sta
             i = end_index + 1;
         } else {
             int semicolon_position = find_semicolon_position(tokens, i, end);
-            if (is_complex_definition_expression(tokens, &i, semicolon_position - 1)) {
+            /*if (is_complex_definition_expression(tokens, &i, semicolon_position - 1)) {
                 struct Complex_Definition* expression
                         = (struct Complex_Definition*)malloc(sizeof(struct Complex_Definition));
                 *expression = get_complex_definition(tokens, i, semicolon_position - 1);
@@ -159,7 +173,8 @@ struct Grammar* get_intermediate_representation_for_scope(void** tokens, int sta
                 grammar.data = expression;
                 grammar.type = COMPLEX_DECLARATION;
                 grammars[grammars_index++] = grammar;
-            } else if (is_single_definition_expression(tokens, &i, semicolon_position - 1)) {
+            }*/
+            if (is_single_definition_expression(tokens, &i, semicolon_position - 1)) {
                 struct Single_Definition* expression
                         = (struct Single_Definition*)malloc(sizeof(struct Single_Definition));
                 *expression = get_single_definition(tokens, i, semicolon_position - 1);
@@ -172,6 +187,27 @@ struct Grammar* get_intermediate_representation_for_scope(void** tokens, int sta
                 *expression = get_single_declaration(tokens, i, semicolon_position - 1);
                 grammar.data = expression;
                 grammar.type = SINGLE_DECLARATION;
+                grammars[grammars_index++] = grammar;
+            } else if (is_arithmetic_expression(tokens, &i, semicolon_position - 1)) {
+                struct Arithmetic_Expression* expression
+                        = (struct Arithmetic_Expression*)malloc(sizeof(struct Arithmetic_Expression));
+                *expression = get_arithmetic_expression(tokens, i, semicolon_position - 1);
+                grammar.data = expression;
+                grammar.type = ARITHMETIC_EXPRESSION;
+                grammars[grammars_index++] = grammar;
+            } else if (is_logical_expression(tokens, &i, semicolon_position - 1)) {
+                struct Logic_Expression* expression
+                        = (struct Logic_Expression*)malloc(sizeof(struct Logic_Expression));
+                *expression = get_logic_expression(tokens, i, semicolon_position - 1);
+                grammar.data = expression;
+                grammar.type = LOGIC_EXPRESSION;
+                grammars[grammars_index++] = grammar;
+            } else if (is_relational_expression(tokens, &i, semicolon_position - 1)) {
+                struct Relational_Expression* expression
+                        = (struct Relational_Expression*)malloc(sizeof(struct Relational_Expression));
+                *expression = get_relational_expression(tokens, i, semicolon_position - 1);
+                grammar.data = expression;
+                grammar.type = RELATIONAL_EXPRESSION;
                 grammars[grammars_index++] = grammar;
             }
             if (i == -1) {
@@ -419,8 +455,12 @@ struct Single_Definition get_single_definition(void** tokens, int start, int end
     ++position;
     definition.var_name = ((struct Token*)(tokens[position]))->attributes->text;
     definition.is_expression = false;
+    definition.is_variable = false;
     position += 2;
     if (position == end) {
+        if (((struct Token*)(tokens[position]))->type == IDENTIFIER) {
+            definition.is_variable = true;
+        }
         definition.expression = ((struct Token*)(tokens[position]))->attributes->text;
     } else {
         if (is_arithmetic_expression(tokens, &position, end)) {
@@ -466,46 +506,116 @@ _check_if_else:
         ++bodies_quantity;
     }
 
-    printf("Count of conditions: %d", conditions_quantity);
-    printf("Count of bodies: %d", bodies_quantity);
     if_else_statement.quantity_of_conditions = conditions_quantity;
     if_else_statement.quantity_of_bodies = bodies_quantity;
     if_else_statement.conditions = malloc(conditions_quantity * sizeof(void*));
     if_else_statement.bodies = malloc(bodies_quantity * sizeof(void*));
+
+    int* grammars_quantities = (int*)malloc(bodies_quantity * sizeof(int));
+    for (int j = 0; j < bodies_quantity; ++j) {
+        *grammars_quantities = 0;
+    }
 
     i = start + 1;
     for (int j = 0; j < conditions_quantity; ++j) {
         round_close_index = find_close_bracket_2(tokens, i, end);
         ++i;
         if (is_logical_expression(tokens, &i, round_close_index - 1)) {
+            struct Grammar* grammar = (struct Grammar*)malloc(sizeof(struct Grammar));
             struct Logic_Expression* expression = (struct Logic_Expression*)malloc(sizeof(struct Logic_Expression));
             *expression = get_logic_expression(tokens, i, round_close_index - 1);
-            if_else_statement.conditions[j] = expression;
+            grammar->data = expression;
+            if_else_statement.conditions[j] = *grammar;
         } else {
+            struct Grammar* grammar = (struct Grammar*)malloc(128 * sizeof(struct Grammar));
             struct Relational_Expression* expression
                     = (struct Relational_Expression*)malloc(sizeof(struct Relational_Expression));
             *expression = get_relational_expression(tokens, i, round_close_index - 1);
-            if_else_statement.conditions[j] = expression;
+            grammar->data = expression;
+            if_else_statement.conditions[j] = *grammar;
         }
         i = round_close_index + 1;
         curly_close_index = find_close_curly_bracket(tokens, i, end);
         int quantity_of_grammars = 0;
-        if_else_statement.bodies[j]
-            = get_intermediate_representation_for_scope(tokens, i + 1, curly_close_index - 1, &quantity_of_grammars);
+        struct Grammar* grammar = get_intermediate_representation_for_scope(
+                tokens, i + 1, curly_close_index - 1, &quantity_of_grammars);
+        grammars_quantities[j] = quantity_of_grammars;
+        if_else_statement.quantities_of_variables[j] = get_quantity_of_variables(grammar, quantity_of_grammars);
+        if_else_statement.bodies[j] = grammar;
         i = curly_close_index + 3;
     }
 
+    if_else_statement.grammars_quantities = grammars_quantities;
     return if_else_statement;
 }
 
 
 struct While get_while_statement(void** tokens, int start, int end) {
+    int i = start + 1;
+    struct While while_statement;
+    int closed_round_index = find_close_bracket_2(tokens, i, end);
+    ++i;
+    if (is_logical_expression(tokens, &i, closed_round_index - 1)) {
+        struct Grammar* grammar = (struct Grammar*)malloc(sizeof(struct Grammar));
+        struct Logic_Expression* expression = (struct Logic_Expression*)malloc(sizeof(struct Logic_Expression));
+        *expression = get_logic_expression(tokens, i, closed_round_index - 1);
+        grammar->data = expression;
+        while_statement.condition = *grammar;
+    } else {
+        struct Grammar* grammar = (struct Grammar*)malloc(128 * sizeof(struct Grammar));
+        struct Relational_Expression* expression
+                = (struct Relational_Expression*)malloc(sizeof(struct Relational_Expression));
+        *expression = get_relational_expression(tokens, i, closed_round_index - 1);
+        grammar->data = expression;
+        while_statement.condition = *grammar;
+    }
 
+    i = closed_round_index + 1;
+    int* quantity_of_grammars = (int*)malloc(1 * sizeof(int));
+    *quantity_of_grammars = 0;
+    struct Grammar* grammars;
+    int closed_curly_index = find_close_curly_bracket(tokens, i, end);
+    grammars = get_intermediate_representation_for_scope(tokens, i + 1, closed_curly_index - 1, quantity_of_grammars);
+    while_statement.body = grammars;
+    while_statement.grammars_quantity = *quantity_of_grammars;
+    while_statement.quantity_of_variables = get_quantity_of_variables(grammars, while_statement.grammars_quantity);
+    i = closed_curly_index + 2;
+
+
+    return while_statement;
 }
 
 
 struct Do_While get_do_while_statement(void** tokens, int start, int end) {
+    int i = start + 1;
+    struct Do_While do_while_statement;
+    int closed_curly_index = find_close_curly_bracket(tokens, i, end);
+    int* quantity_of_grammars = (int*)malloc(1 * sizeof(int));
+    *quantity_of_grammars = 0;
+    struct Grammar* grammars;
+    grammars = get_intermediate_representation_for_scope(tokens, i + 1, closed_curly_index, quantity_of_grammars);
+    do_while_statement.body = grammars;
+    do_while_statement.grammars_quantity = *quantity_of_grammars;
+    do_while_statement.quantity_of_variables = get_quantity_of_variables(grammars, do_while_statement.grammars_quantity);
+    i = closed_curly_index + 2;
+    int closed_round_index = find_close_bracket_2(tokens, i, end);
+    ++i;
+    if (is_logical_expression(tokens, &i, closed_round_index - 1)) {
+        struct Grammar* grammar = (struct Grammar*)malloc(sizeof(struct Grammar));
+        struct Logic_Expression* expression = (struct Logic_Expression*)malloc(sizeof(struct Logic_Expression));
+        *expression = get_logic_expression(tokens, i, closed_round_index - 1);
+        grammar->data = expression;
+        do_while_statement.condition = *grammar;
+    } else {
+        struct Grammar* grammar = (struct Grammar*)malloc(128 * sizeof(struct Grammar));
+        struct Relational_Expression* expression
+                = (struct Relational_Expression*)malloc(sizeof(struct Relational_Expression));
+        *expression = get_relational_expression(tokens, i, closed_round_index - 1);
+        grammar->data = expression;
+        do_while_statement.condition = *grammar;
+    }
 
+    return do_while_statement;
 }
 
 

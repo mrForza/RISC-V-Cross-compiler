@@ -1,3 +1,4 @@
+#pragma once
 #include "stdbool.h"
 
 enum Type_Of_Grammars {
@@ -66,6 +67,7 @@ struct Single_Definition {
     char* var_name;
     void* expression;
     bool is_expression;
+    bool is_variable;
 };
 
 
@@ -73,12 +75,15 @@ struct Complex_Definition {
     char* type;
     char** var_names;
     void** expressions;
+    int quantity_of_variables;
 };
 
 
 struct If_Else {
-    void** conditions; // n
-    void** bodies; // n + 1
+    struct Grammar* conditions; // n
+    struct Grammar** bodies; // n + 1
+    int* grammars_quantities;
+    int* quantities_of_variables;
     int quantity_of_conditions;
     int quantity_of_bodies;
     bool is_else_exists;
@@ -86,12 +91,18 @@ struct If_Else {
 
 
 struct While {
-
+    struct Grammar condition;
+    struct Grammar* body;
+    int grammars_quantity;
+    int quantity_of_variables;
 };
 
 
 struct Do_While {
-
+    struct Grammar condition;
+    struct Grammar* body;
+    int grammars_quantity;
+    int quantity_of_variables;
 };
 
 

@@ -45,7 +45,9 @@ CMakeFiles/RISC_V_Cross_compiler.dir/main.c.obj: C:/Users/inter/Documents/Projec
   C:/Users/inter/Documents/Projects/C/RISC-V-Cross-compiler/include/parser/syntax_analyzer.c \
   C:/Users/inter/Documents/Projects/C/RISC-V-Cross-compiler/include/parser/syntax_analyzer.h \
   C:/Users/inter/Documents/Projects/C/RISC-V-Cross-compiler/include/lexer/token.h \
-  C:/Users/inter/Documents/Projects/C/RISC-V-Cross-compiler/include/parser/complex_structures.c
+  C:/Users/inter/Documents/Projects/C/RISC-V-Cross-compiler/include/parser/complex_structures.c \
+  C:/Users/inter/Documents/Projects/C/RISC-V-Cross-compiler/include/codegen/code_generator.c \
+  C:/Users/inter/Documents/Projects/C/RISC-V-Cross-compiler/include/codegen/code_generator.h
 
 
 C:/Users/inter/Documents/Projects/C/RISC-V-Cross-compiler/main.c:
@@ -133,3 +135,7 @@ C:/Users/inter/Documents/Projects/C/RISC-V-Cross-compiler/include/lexer/lexer.h:
 C:/Users/inter/Documents/Projects/C/RISC-V-Cross-compiler/include/lexer/token.c:
 
 C:/Users/inter/Documents/Projects/C/RISC-V-Cross-compiler/include/parser/syntax_analyzer.h:
+
+C:/Users/inter/Documents/Projects/C/RISC-V-Cross-compiler/include/codegen/code_generator.c:
+
+C:/Users/inter/Documents/Projects/C/RISC-V-Cross-compiler/include/codegen/code_generator.h:

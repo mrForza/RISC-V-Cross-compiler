@@ -3,6 +3,10 @@
 #include "include/file_handler/file_handler.c"
 #include "include/preprocessor/preprocessor.c"
 #include "include/parser/parser.c"
+#include "include/codegen/code_generator.c"
+
+
+int global_tab_counter = 0;
 
 const char* GREETINGS_TEXT = "The simple Small-C preprocessor\n";
 
@@ -12,7 +16,7 @@ const char* LOGO = "\n"
                    " | |_) || |\\___ \\| |   ____\\ \\ / /  | |   | '__/ _ \\/ __/ __|_____| |   / _ \\| '_ ` _ \\| '_ \\| | |/ _ \\ '__|\n"
                    " |  _ < | | ___) | |__|_____\\ V /   | |___| | | (_) \\__ \\__ \\_____| |__| (_) | | | | | | |_) | | |  __/ |   \n"
                    " |_| \\_\\___|____/ \\____|     \\_/     \\____|_|  \\___/|___/___/      \\____\\___/|_| |_| |_| .__/|_|_|\\___|_|   \n"
-                   "                                                                                       |_|                  ";
+                   "                                                                                       |_|                  \n\n\n";
 
 void print_all_tokens(struct Vector* tokens) {
     printf("\n");
@@ -160,45 +164,59 @@ void print_syntax_constructions(struct Grammar* grammars, size_t size) {
 
         switch (grammars[i].type) {
             case SINGLE_DECLARATION:
-                printf("SINGLE_DECLARATION\n");
+                printf("%s", concatenate(multiply_string("\t", global_tab_counter), "SINGLE_DECLARATION\n\n"));
                 break;
             case COMPLEX_DECLARATION:
-                printf("COMPLEX_DECLARATION\n");
+                printf("%s", concatenate(multiply_string("\t", global_tab_counter), "COMPLEX_DECLARATION\n\n"));
                 break;
             case SINGLE_DEFINITION:
-                printf("SINGLE_DEFINITION\n");
+                printf("%s", concatenate(multiply_string("\t", global_tab_counter), "SINGLE_DEFINITION\n\n"));
                 break;
             case COMPLEX_DEFINITION:
-                printf("COMPLEX_DEFINITION\n");
+                printf("%s", concatenate(multiply_string("\t", global_tab_counter), "COMPLEX_DEFINITION\n\n"));
                 break;
             case ARITHMETIC_EXPRESSION:
-                printf("ARITHMETIC_EXPRESSION\n");
+                printf("%s", concatenate(multiply_string("\t", global_tab_counter), "ARITHMETIC_EXPRESSION\n\n"));
                 break;
             case LOGIC_EXPRESSION:
-                printf("LOGIC_EXPRESSION\n");
+                printf("%s", concatenate(multiply_string("\t", global_tab_counter), "LOGIC_EXPRESSION\n\n"));
                 break;
             case RELATIONAL_EXPRESSION:
-                printf("RELATIONAL_EXPRESSION\n");
+                printf("%s", concatenate(multiply_string("\t", global_tab_counter), "RELATIONAL_EXPRESSION\n\n"));
                 break;
             case IF_ELSE_STATEMENT:
                 if_else_statement = *((struct If_Else*)grammars[i].data);
+                printf("%s", concatenate(multiply_string("\t", global_tab_counter), "IF_ELSE_STATEMENT ("));
+                ++global_tab_counter;
                 for (int j = 0; j < if_else_statement.quantity_of_conditions; ++j) {
-                    printf("LOGIC_EXPRESSION");
-                    print_syntax_constructions(if_else_statement.bodies, 1);
+                    if (j == 0) {
+                        printf("LOGIC_EXPRESSION)\n");
+                    } else {
+                        printf("%s", concatenate(multiply_string("\t", global_tab_counter - 1), "ELSE_IF_STATEMENT (LOGIC_EXPRESSION)\n"));
+                    }
+                    print_syntax_constructions(if_else_statement.bodies[j], if_else_statement.grammars_quantities[j]);
                 }
-                printf("IF_ELSE_STATEMENT\n");
+                --global_tab_counter;
                 break;
             case DO_WHILE_STATEMENT:
-                printf("DO_WHILE_STATEMENT\n");
+                do_while_statement = *((struct Do_While*)grammars[i].data);
+                printf("%s", concatenate(multiply_string("\t", global_tab_counter), "DO_WHILE (LOGIC_EXPRESSION)\n"));
+                ++global_tab_counter;
+                print_syntax_constructions(do_while_statement.body, do_while_statement.grammars_quantity);
+                --global_tab_counter;
                 break;
             case WHILE_STATEMENT:
-                printf("WHILE_STATEMENT\n");
+                while_statement = *((struct While*)grammars[i].data);
+                printf("%s", concatenate(multiply_string("\t", global_tab_counter), "WHILE (LOGIC_EXPRESSION)\n"));
+                ++global_tab_counter;
+                print_syntax_constructions(while_statement.body, while_statement.grammars_quantity);
+                --global_tab_counter;
                 break;
             case FOR_STATEMENT:
-                printf("FOR_STATEMENT\n");
+                printf("FOR_STATEMENT\n\n");
                 break;
             case FUNCTION_DECLARATION:
-                printf("FUNCTION_DECLARATION\n");
+                printf("FUNCTION_DECLARATION\n\n");
                 break;
         }
     }
@@ -240,7 +258,7 @@ int main() {
     fclose(handler.file_pointer);
     delete_repetitive_spaces(handler)*/
 
-    open_file_pointer = fopen("testfile.c", "r");
+    open_file_pointer = fopen("test_var_definitions.c", "r");
     fseek(open_file_pointer, 0L, SEEK_END);
     size_t size = ftell(open_file_pointer);
     fseek(open_file_pointer, 0L, SEEK_SET);
@@ -249,14 +267,20 @@ int main() {
 
     struct Lexer* lexer = (struct Lexer*)malloc(sizeof(struct Lexer));
     *lexer = init_lexer(buffer, strlen(buffer));
+    printf("TOKENS:\n");
     print_all_tokens(get_all_tokens(lexer));
-    printf("\n\n");
+    printf("\n\n\n");
 
     struct Parser* parser = (struct Parser*)malloc(sizeof(struct Parser));
     *parser = init_parser(lexer);
 
     int quantity_of_grammars = 0;
     struct Grammar* grammars = start_parsing(parser, &quantity_of_grammars);
+    printf("SYNTAX CONSTRUCTIONS:\n");
     print_syntax_constructions(grammars, quantity_of_grammars);
+    printf("\n\n\n");
+
+    printf("RISC_V ASSEMBLER:\n");
+    printf("%s", generate_assembly_for_grammars(grammars, quantity_of_grammars));
     return 0;
 }

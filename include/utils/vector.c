@@ -2,7 +2,7 @@
 #include "stdlib.h"
 
 
-struct Vector* init_vector(unsigned long long capacity, enum Type_Of_Items type) {
+struct Vector* init_vector(int capacity, enum Type_Of_Items type) {
     struct Vector* vector = (struct Vector*)malloc(1 * sizeof(struct Vector));
     vector->size = 0;
     vector->capacity = capacity;
@@ -14,7 +14,7 @@ struct Vector* init_vector(unsigned long long capacity, enum Type_Of_Items type)
         vector->data = (void*)(struct Token**)malloc(vector->capacity * sizeof(struct Token*));
     }
 
-    for (unsigned long long i = 0; i < vector->capacity; ++i) {
+    for (int i = 0; i < vector->capacity; ++i) {
         vector->data[i] = NULL;
     }
 
@@ -45,7 +45,7 @@ void push_back_integer(struct Vector* vector, size_t number) {
 
 
 void destroy_vector(struct Vector* vector) {
-    for (unsigned long long i = 0; i < vector->size; ++i) {
+    for (int i = 0; i < vector->size; ++i) {
         free(vector->data[i]);
     }
     free(vector);
