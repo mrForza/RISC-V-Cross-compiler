@@ -195,6 +195,8 @@ bool is_logical_expression(void** tokens, const int* start_position, int size) {
     if (((struct Token*)(tokens[i]))->type == LOGIC_OPERATOR) {
         ++i;
         goto _start;
+    } else {
+        return false;
     }
 
     return true;
@@ -536,5 +538,26 @@ bool is_for_statement(void** tokens, const int* start_position, int size) {
     }
 
     printf("ERROR: Missing curly bracket!");
+    return false;
+}
+
+
+bool is_assignment_expression(void** tokens, const int* start_position, int size) {
+    int i = *start_position;
+
+    if (((struct Token*)(tokens[i]))->type == IDENTIFIER) {
+        ++i;
+        if (((struct Token*)(tokens[i]))->type == ARITHMETIC_ASSIGN_OPERATOR) {
+            ++i;
+            if (is_arithmetic_expression(tokens, &i, size)) {
+                return true;
+            } else {
+                if (((struct Token*)(tokens[i]))->type == DECIMAL_INT_LITERAL ||
+                    ((struct Token*)(tokens[i]))->type == CHAR_LITERAL) {
+                    return true;
+                }
+            }
+        }
+    }
     return false;
 }

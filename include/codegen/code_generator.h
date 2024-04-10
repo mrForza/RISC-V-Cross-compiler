@@ -23,10 +23,10 @@ struct Stack_Context* init_stack_context(int capacity);
 void add_variable_in_stack_context(struct Stack_Context* context, struct Variable* variable);
 
 
-char* generate_assembly_for_var_declaration(char* type, char* var_name);
+char* generate_assembly_for_var_declaration(struct Single_Declaration single_declaration);
 
 
-char* generate_assembly_for_variables_declarations(char* type, char** var_names, unsigned long long count);
+char* generate_assembly_for_variables_declarations(struct Complex_Declaration complex_declaration);
 
 
 char* generate_assembly_for_var_definition(struct Single_Definition definition_expression);
@@ -44,7 +44,7 @@ char* generate_assembly_for_arithmetic_expression(struct Arithmetic_Expression e
 char* generate_assembly_for_logic_expression(struct Logic_Expression expression);
 
 
-char* generate_assembly_for_relational_expression(struct Relational_Expression expression);
+char* generate_assembly_for_relational_expression(struct Relational_Expression expression, char* label);
 
 
 char* generate_assembly_for_if_else_statement(struct If_Else statement);

@@ -166,20 +166,27 @@ struct Grammar* get_intermediate_representation_for_scope(void** tokens, int sta
                 grammar.data = expression;
                 grammar.type = COMPLEX_DEFINITION;
                 grammars[grammars_index++] = grammar;
+            }*/
+            if (is_assignment_expression(tokens, &i, semicolon_position - 1)) {
+                struct Assignment_Expression* expression
+                        = (struct Assignment_Expression*)malloc(sizeof(struct Assignment_Expression));
+                *expression = get_assignment_expression(tokens, i, semicolon_position - 1);
+                grammar.data = expression;
+                grammar.type = ASSIGNMENT_EXPRESSION;
+                grammars[grammars_index++] = grammar;
+            } else if (is_single_definition_expression(tokens, &i, semicolon_position - 1)) {
+                struct Single_Definition* expression
+                        = (struct Single_Definition*)malloc(sizeof(struct Single_Definition));
+                *expression = get_single_definition(tokens, i, semicolon_position - 1);
+                grammar.data = expression;
+                grammar.type = SINGLE_DEFINITION;
+                grammars[grammars_index++] = grammar;
             } else if (is_complex_declaration_expression(tokens, &i, semicolon_position - 1)) {
                 struct Complex_Declaration* expression
                         = (struct Complex_Declaration*)malloc(sizeof(struct Complex_Declaration));
                 *expression = get_complex_declaration(tokens, i, semicolon_position - 1);
                 grammar.data = expression;
                 grammar.type = COMPLEX_DECLARATION;
-                grammars[grammars_index++] = grammar;
-            }*/
-            if (is_single_definition_expression(tokens, &i, semicolon_position - 1)) {
-                struct Single_Definition* expression
-                        = (struct Single_Definition*)malloc(sizeof(struct Single_Definition));
-                *expression = get_single_definition(tokens, i, semicolon_position - 1);
-                grammar.data = expression;
-                grammar.type = SINGLE_DEFINITION;
                 grammars[grammars_index++] = grammar;
             } else if (is_single_declaration_expression(tokens, &i, semicolon_position - 1)) {
                 struct Single_Declaration* expression
@@ -424,15 +431,19 @@ struct Complex_Declaration get_complex_declaration(void** tokens, int start, int
         complex_declaration.type = "double";
     }
 
-    int counter = 0;
+    int counter = 1;
     for (int i = start + 1; i < end; ++i) {
-        ++counter;
+        if (((struct Token*)tokens[i])->type == IDENTIFIER) {
+            ++counter;
+        }
     }
 
     complex_declaration.var_names = (char**)malloc(counter * sizeof(char));
+    complex_declaration.quantity_of_variables = counter;
     int j = start + 1;
     for (int i = 0; i < counter; ++i) {
-        complex_declaration.var_names[i] = ((struct Token*)(tokens[j++]))->attributes->text;
+        complex_declaration.var_names[i] = ((struct Token*)(tokens[j]))->attributes->text;
+        j += 2;
     }
 
     return complex_declaration;
@@ -540,6 +551,7 @@ _check_if_else:
         struct Grammar* grammar = get_intermediate_representation_for_scope(
                 tokens, i + 1, curly_close_index - 1, &quantity_of_grammars);
         grammars_quantities[j] = quantity_of_grammars;
+        if_else_statement.quantities_of_variables = (int*)malloc(16 * sizeof(int));
         if_else_statement.quantities_of_variables[j] = get_quantity_of_variables(grammar, quantity_of_grammars);
         if_else_statement.bodies[j] = grammar;
         i = curly_close_index + 3;
@@ -621,4 +633,21 @@ struct Do_While get_do_while_statement(void** tokens, int start, int end) {
 
 struct For get_for_statement(void** tokens, int start, int end) {
 
+}
+
+
+struct Assignment_Expression get_assignment_expression(void** tokens, int start, int end) {
+    struct Assignment_Expression expression;
+    int i = start;
+    expression.var_name = ((struct Token*)(tokens[i]))->attributes->text;
+    expression.sign = ((struct Token*)(tokens[i + 1]))->attributes->text;
+    if (expression.is_value_expression) {
+        struct Arithmetic_Expression* arithm = (struct Arithmetic_Expression*)malloc(sizeof(struct Arithmetic_Expression));
+        *arithm = get_arithmetic_expression(tokens, i + 2, end);
+        expression.value = arithm;
+    } else {
+        expression.value = ((struct Token*)(tokens[i + 2]))->attributes->text;
+    }
+
+    return expression;
 }

@@ -619,6 +619,10 @@ struct Token* get_assignment_token(char* content, unsigned long long position) {
             type = ASSIGN_OPERATOR;
             char* lexeme_text = get_substring(content, position, position);
             return init_token(type, lexeme_text, 1, 0, position);
+        } else {
+            type = INCORRECT;
+            char* lexeme_text = get_substring(content, position, position);
+            return init_token(type, lexeme_text, 1, 0, position);
         }
     }
     char* lexeme_text = get_substring(content, position, position + 1);
@@ -674,6 +678,8 @@ struct Token* get_comparison_token(char* content, unsigned long long position) {
     enum Type_Of_Token type;
     if (content[position] == '<' || content[position] == '>') {
         type = COMPARISON_OPERATOR;
+        char* lexeme_text = get_substring(content, position, position);
+        return init_token(type, lexeme_text, 1, 0, position);
     } else {
         if ((content[position] == '=' || content[position] == '!' || content[position] == '<' || content[position] == '>')
             && content[position + 1] == '=') {
@@ -710,6 +716,11 @@ struct Token* get_other_token(char* content, unsigned long long position) {
         return token;
     }
 
+    token = get_assignment_token(content, position);
+    if (token->type != INCORRECT) {
+        return token;
+    }
+
     token = get_logic_token(content, position);
     if (token->type != INCORRECT) {
         return token;
@@ -730,7 +741,7 @@ struct Token* get_other_token(char* content, unsigned long long position) {
         return token;
     }
 
-    return get_assignment_token(content, position);
+    return init_token(COMMA, ",", 1, 0, 0);
 }
 
 

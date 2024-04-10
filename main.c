@@ -218,6 +218,9 @@ void print_syntax_constructions(struct Grammar* grammars, size_t size) {
             case FUNCTION_DECLARATION:
                 printf("FUNCTION_DECLARATION\n\n");
                 break;
+            case ASSIGNMENT_EXPRESSION:
+                printf("ASSIGNMENT_EXPRESSION\n");
+                break;
         }
     }
 }
@@ -258,7 +261,7 @@ int main() {
     fclose(handler.file_pointer);
     delete_repetitive_spaces(handler)*/
 
-    open_file_pointer = fopen("test_var_definitions.c", "r");
+    open_file_pointer = fopen("test_if_else.c", "r");
     fseek(open_file_pointer, 0L, SEEK_END);
     size_t size = ftell(open_file_pointer);
     fseek(open_file_pointer, 0L, SEEK_SET);

@@ -13,7 +13,8 @@ enum Type_Of_Grammars {
     DO_WHILE_STATEMENT = 8,
     WHILE_STATEMENT = 9,
     FOR_STATEMENT = 10,
-    FUNCTION_DECLARATION = 11
+    FUNCTION_DECLARATION = 11,
+    ASSIGNMENT_EXPRESSION = 12
 };
 
 
@@ -59,6 +60,7 @@ struct Single_Declaration {
 struct Complex_Declaration {
     char* type;
     char** var_names;
+    int quantity_of_variables;
 };
 
 
@@ -76,6 +78,14 @@ struct Complex_Definition {
     char** var_names;
     void** expressions;
     int quantity_of_variables;
+};
+
+
+struct Assignment_Expression {
+    char* var_name;
+    char* sign;
+    void* value;
+    bool is_value_expression;
 };
 
 
