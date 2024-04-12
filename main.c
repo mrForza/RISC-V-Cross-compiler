@@ -261,7 +261,7 @@ int main() {
     fclose(handler.file_pointer);
     delete_repetitive_spaces(handler)*/
 
-    open_file_pointer = fopen("test_if_else.c", "r");
+    open_file_pointer = fopen("fibonacci.c", "r");
     fseek(open_file_pointer, 0L, SEEK_END);
     size_t size = ftell(open_file_pointer);
     fseek(open_file_pointer, 0L, SEEK_SET);

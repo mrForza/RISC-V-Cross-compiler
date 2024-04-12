@@ -636,17 +636,35 @@ struct For get_for_statement(void** tokens, int start, int end) {
 }
 
 
+bool check_string_is_number(char* string) {
+    for (int i = 0; i < strlen((string)); ++i) {
+        if (string[i] < '0' || string[i] > '9') {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+
 struct Assignment_Expression get_assignment_expression(void** tokens, int start, int end) {
     struct Assignment_Expression expression;
     int i = start;
     expression.var_name = ((struct Token*)(tokens[i]))->attributes->text;
     expression.sign = ((struct Token*)(tokens[i + 1]))->attributes->text;
-    if (expression.is_value_expression) {
+    expression.is_value_expression = false;
+    expression.is_variable = false;
+
+    if (end - i - 2 > 1) {
         struct Arithmetic_Expression* arithm = (struct Arithmetic_Expression*)malloc(sizeof(struct Arithmetic_Expression));
         *arithm = get_arithmetic_expression(tokens, i + 2, end);
         expression.value = arithm;
+        expression.is_value_expression = true;
     } else {
         expression.value = ((struct Token*)(tokens[i + 2]))->attributes->text;
+        if (!check_string_is_number(expression.value)) {
+            expression.is_variable = true;
+        }
     }
 
     return expression;

@@ -86,6 +86,7 @@ struct Assignment_Expression {
     char* sign;
     void* value;
     bool is_value_expression;
+    bool is_variable;
 };
 
 

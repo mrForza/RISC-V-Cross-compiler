@@ -44,7 +44,8 @@ char* generate_assembly_for_arithmetic_expression(struct Arithmetic_Expression e
 char* generate_assembly_for_logic_expression(struct Logic_Expression expression);
 
 
-char* generate_assembly_for_relational_expression(struct Relational_Expression expression, char* label);
+char* generate_assembly_for_relational_expression(struct Relational_Expression expression, char* label,
+        char* cancel_label, bool key);
 
 
 char* generate_assembly_for_if_else_statement(struct If_Else statement);
@@ -57,3 +58,6 @@ char* generate_assembly_for_while_statement(struct While statement);
 
 
 char* generate_assembly_for_for_statement(struct For statement);
+
+
+char* generate_assembly_for_assignment_expression(struct Assignment_Expression expression);
