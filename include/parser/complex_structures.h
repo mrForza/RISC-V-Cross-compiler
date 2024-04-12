@@ -1,5 +1,26 @@
-#include "../lexer/token.h"
-#include "../utils/vector.h"
+#pragma once
+#include "stdbool.h"
+
+enum Type_Of_Grammars {
+    SINGLE_DECLARATION = 0,
+    COMPLEX_DECLARATION = 1,
+    SINGLE_DEFINITION = 2,
+    COMPLEX_DEFINITION = 3,
+    ARITHMETIC_EXPRESSION = 4,
+    LOGIC_EXPRESSION = 5,
+    RELATIONAL_EXPRESSION = 6,
+    IF_ELSE_STATEMENT = 7,
+    DO_WHILE_STATEMENT = 8,
+    WHILE_STATEMENT = 9,
+    FOR_STATEMENT = 10,
+    FUNCTION_DECLARATION = 11
+};
+
+
+struct Grammar {
+    void* data;
+    enum Type_Of_Grammars type;
+};
 
 
 struct Arithmetic_Expression {
@@ -13,15 +34,19 @@ struct Arithmetic_Expression {
 
 struct Logic_Expression {
     void* left_operand;
-    struct Token token; // LOGIC_OPERATOR
+    char* operator; // LOGIC_OPERATOR
     void* right_operand;
+    bool is_left_expr;
+    bool is_right_expr;
 };
 
 
 struct Relational_Expression {
     void *left_operand;
-    struct Token token; // RELATIONAL_OPERATOR
+    char* operator; // RELATIONAL_OPERATOR
     void *right_operand;
+    bool is_left_expr;
+    bool is_right_expr;
 };
 
 
@@ -34,83 +59,62 @@ struct Single_Declaration {
 struct Complex_Declaration {
     char* type;
     char** var_names;
+    int quantity_of_variables;
 };
 
 
 struct Single_Definition {
     char* type;
     char* var_name;
-    char* value;
+    void* expression;
+    bool is_expression;
+    bool is_variable;
 };
 
 
 struct Complex_Definition {
     char* type;
     char** var_names;
-    char** values;
+    void** expressions;
+    int quantity_of_variables;
+};
+
+
+struct Assignment_Expression {
+    char* var_name;
+    char* sign;
+    void* value;
+    bool is_value_expression;
 };
 
 
 struct If_Else {
-
+    struct Grammar* conditions; // n
+    struct Grammar** bodies; // n + 1
+    int* grammars_quantities;
+    int* quantities_of_variables;
+    int quantity_of_conditions;
+    int quantity_of_bodies;
+    bool is_else_exists;
 };
 
 
 struct While {
-
+    struct Grammar condition;
+    struct Grammar* body;
+    int grammars_quantity;
+    int quantity_of_variables;
 };
 
 
 struct Do_While {
-
+    struct Grammar condition;
+    struct Grammar* body;
+    int grammars_quantity;
+    int quantity_of_variables;
 };
 
 
 struct For {
 
 };
-
-
-size_t find_close_bracket(void** tokens, size_t start_position, size_t size);
-
-
-bool is_arithmetic_expression(void** tokens, const size_t* start_position, size_t size);
-
-
-bool is_single_declaration_expression(void** tokens, const size_t* start_position, size_t size);
-
-
-bool is_complex_declaration_expression(void** tokens, const size_t* start_position, size_t size);
-
-
-bool is_single_definition_expression(void** tokens, const size_t* start_position, size_t size);
-
-
-bool is_complex_definition_expression(void** tokens, const size_t* start_position, size_t size);
-
-
-bool is_logical_expression(void** tokens, const size_t* start_position, size_t size);
-
-
-bool is_relational_expression(void** tokens, const size_t* start_position, size_t size);
-
-
-bool is_bitwise_expression(void** tokens, const size_t* start_position, size_t size);
-
-
-bool is_if_else_statement(void** tokens, const size_t* start_position, size_t size);
-
-
-bool is_while_statement(void** tokens, const size_t* start_position, size_t size);
-
-
-bool is_do_while_statement(void** tokens, const size_t* start_position, size_t size);
-
-
-bool is_for_statement(void** tokens, const size_t* start_position, size_t size);
-
-
-bool is_prefix_expression(void** tokens, const size_t* start_position, size_t size);
-
-
-bool is_postfix_expression(void** tokens, const size_t* start_position, size_t size);

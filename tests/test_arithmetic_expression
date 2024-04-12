@@ -1,3 +1,9 @@
+int main() {
+    (((3 & 12) + 1) * 8) | (7 + 6)
+    return 0;
+}
+
+
 struct Vector* vector = init_vector(1024, TOKEN);
 push_back_token(vector, init_token(DECIMAL_INTEGER_LITERAL, "3", 0, 0, 0));
 push_back_token(vector, init_token(ARITHMETIC_OPERATOR, "+", 0, 0, 0));
@@ -138,3 +144,5 @@ struct Vector* vector = init_vector(1024, TOKEN);
     push_back_token(vector, init_token(ARITHMETIC_OPERATOR, "+", 0, 0, 0));
     push_back_token(vector, init_token(DECIMAL_INTEGER_LITERAL, "6", 0, 0, 0));
     push_back_token(vector, init_token(RIGHT_ROUND_BRACKET, ")", 0, 0, 0));
+
+

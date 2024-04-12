@@ -4,7 +4,7 @@
 
 
 enum Type_Of_Items {
-    INT,
+    NUMBER,
     TOKEN,
     GRAMMAR
 };
@@ -12,16 +12,19 @@ enum Type_Of_Items {
 
 struct Vector {
     void** data;
-    unsigned long long size;
-    unsigned long long capacity;
+    int size;
+    int capacity;
     enum Type_Of_Items type;
 };
 
 
-struct Vector* init_vector(unsigned long long capacity, enum Type_Of_Items);
+struct Vector* init_vector(int capacity, enum Type_Of_Items);
 
 
 void push_back_token(struct Vector* vector, struct Token* token);
+
+
+void push_back_integer(struct Vector* vector, size_t number);
 
 
 void destroy_vector(struct Vector* vector);
