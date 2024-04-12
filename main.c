@@ -232,7 +232,8 @@ int main() {
 
     struct file_handler handler;
     FILE* open_file_pointer;
-    /*
+    char* buffer;
+
     while (true) {
         char* file_name = get_full_name();
         if (validate_filename(file_name)) {
@@ -259,14 +260,7 @@ int main() {
     delete_singleline_comments(handler);
     delete_multiline_comments(handler);
     fclose(handler.file_pointer);
-    delete_repetitive_spaces(handler)*/
-
-    open_file_pointer = fopen("fibonacci.c", "r");
-    fseek(open_file_pointer, 0L, SEEK_END);
-    size_t size = ftell(open_file_pointer);
-    fseek(open_file_pointer, 0L, SEEK_SET);
-    char* buffer = (char*)malloc(sizeof(char) * size);
-    fread(buffer, sizeof(char), size, open_file_pointer);
+    delete_repetitive_spaces(handler);
 
     struct Lexer* lexer = (struct Lexer*)malloc(sizeof(struct Lexer));
     *lexer = init_lexer(buffer, strlen(buffer));

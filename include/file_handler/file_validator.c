@@ -15,8 +15,6 @@ const char* FILE_DOES_NOT_EXIST = "There is no source file in current directory!
 const char* INCORRECT_EXTENSION_ERROR = "Your source file has an incorrect extension";
 
 const char FORBIDDEN_SYMBOLS[COUNT_OF_FORBIDDEN_SYMBOLS] = {
-    '/',
-    '\\',
     ':',
     '*',
     '?',
