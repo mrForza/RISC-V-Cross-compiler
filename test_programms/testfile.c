@@ -1,25 +1,22 @@
 int main() {
     int a = 1;
-    (7 - (1 * 80)) + (1 + 8);
-    int c = 3;
+    int b = 3;
 
-    if (1 > 2) {
+    if ((a == 1) && (b > 2)) {
         int c, d, s;
-        if ((3 > 5) && (1 < 3)) {
-            int v = 3;
+        while (a < 10) {
+            d = a;
+            a = a + 1;
         }
-    } else if (1 > 2) {
-        int a = 1;
-    } else if (1 > 2) {
-        int b = 123;
-    }
-
-    do {
-        int a = 1;
-    } while (1 > 2);
-
-
-    while (1 > 2) {
-
+    } else if (a == 2) {
+        for (int i = 0; i < 3; ++i) {
+            char c = 'a';
+        }
+    } else if (a == 3) {
+        do {
+            ++a;
+        } while (a != 4);
     }
 }
+
+

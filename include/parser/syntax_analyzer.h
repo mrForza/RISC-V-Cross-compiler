@@ -47,3 +47,9 @@ bool is_prefix_expression(void** tokens, const int* start_position, int size);
 
 
 bool is_postfix_expression(void** tokens, const int* start_position, int size);
+
+
+bool is_function_declaration(void** tokens, const int* start_position, int end);
+
+
+bool is_function_calling(void** tokens, const int* start_position, int end);

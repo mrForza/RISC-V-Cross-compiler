@@ -561,3 +561,63 @@ bool is_assignment_expression(void** tokens, const int* start_position, int size
     }
     return false;
 }
+
+
+bool is_function_declaration(void** tokens, const int* start_position, int end) {
+    int i = *start_position;
+
+    if (((struct Token*)(tokens[i]))->type == INT ||
+        ((struct Token*)(tokens[i]))->type == CHAR ||
+        ((struct Token*)(tokens[i]))->type == DOUBLE ) {
+        ++i;
+        if (((struct Token*)(tokens[i]))->type == IDENTIFIER) {
+            ++i;
+            if (((struct Token*)(tokens[i]))->type == LEFT_ROUND_BRACKET) {
+                int closed_round_brackets = find_close_bracket(tokens, i, end);
+                if (closed_round_brackets == -1) {
+                    printf("SYNTAX ERROR: No closed round brackets!");
+                }
+                ++i;
+                if (is_complex_declaration_expression(tokens, &i, closed_round_brackets - 1)) {
+                    i = closed_round_brackets + 1;
+                    if (((struct Token*)(tokens[i]))->type == LEFT_CURLY_BRACKET) {
+                        int closed_curly_index = find_close_curly_bracket(tokens, i, end);
+                        if (closed_curly_index == -1) {
+                            printf("SYNTAX ERROR: No closed curly brackets!");
+                        }
+                        return true;
+                    }
+                }
+            }
+        }
+    }
+
+    return false;
+}
+
+
+bool is_function_calling(void** tokens, const int* start_position, int end) {
+    int i = *start_position;
+
+    if (((struct Token*)(tokens[i]))->type == IDENTIFIER) {
+        ++i;
+        if (((struct Token*)(tokens[i]))->type == LEFT_ROUND_BRACKET) {
+            int closed_round_brackets = find_close_bracket(tokens, i, end);
+            if (closed_round_brackets == -1) {
+                printf("SYNTAX ERROR: No closed round brackets!");
+            }
+            ++i;
+            while (i < closed_round_brackets) {
+                if (((struct Token*)(tokens[i]))->type == IDENTIFIER) {
+                    ++i;
+                }
+                if (((struct Token*)(tokens[i]))->type == COMMA) {
+                    ++i;
+                }
+            }
+            return true;
+        }
+    }
+
+    return false;
+}

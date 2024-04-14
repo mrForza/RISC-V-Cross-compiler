@@ -632,8 +632,8 @@ char* generate_assembly_for_assignment_expression(struct Assignment_Expression e
 
     }
 
-    int value = atoi((char*)expression.value);
-    int left = atoi(stack_context->variables[index].value);
+    int value = strtol(expression.value, NULL, 10);
+    int left = strtol(stack_context->variables[index].value, NULL, 10);
 _operators:
 
     if (strcmp(expression.sign, "+=") == 0) {
