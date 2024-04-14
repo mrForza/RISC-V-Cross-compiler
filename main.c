@@ -227,20 +227,20 @@ void print_syntax_constructions(struct Grammar* grammars, size_t size) {
 
 
 int main() {
-    printf("%s", GREETINGS_TEXT);
-    printf("%s", LOGO);
-
     struct file_handler handler;
     FILE* open_file_pointer;
     char* buffer;
 
+    printf("%s\n", GREETINGS_TEXT);
+    printf("%s\n", LOGO);
+
     while (true) {
-        char* file_name = get_full_name();
+        char* file_name = "testfile.c";
         if (validate_filename(file_name)) {
             char** splitted_info = split_full_name(file_name);
             char* name = splitted_info[0];
             char* extension = splitted_info[1];
-            open_file_pointer = fopen(file_name, "r");
+            open_file_pointer = fopen("testfile.c", "r");
             if (open_file_pointer) {
                 if (validate_file_existance(open_file_pointer)) {
                     handler.file_pointer = open_file_pointer;
@@ -249,7 +249,7 @@ int main() {
                     fseek(open_file_pointer, 0L, SEEK_END);
                     handler.size = ftell(open_file_pointer);
                     fseek(open_file_pointer, 0L, SEEK_SET);
-                    buffer = (char*)malloc(handler.size * sizeof(char));
+                    buffer = (char*)malloc((handler.size + 1) * sizeof(char));
                     fread(buffer, sizeof(char), handler.size, open_file_pointer);
                     break;
                 }
@@ -263,6 +263,7 @@ int main() {
     delete_repetitive_spaces(handler);
 
     struct Lexer* lexer = (struct Lexer*)malloc(sizeof(struct Lexer));
+    buffer[strlen(buffer)] = '\0';
     *lexer = init_lexer(buffer, strlen(buffer));
     printf("TOKENS:\n");
     print_all_tokens(get_all_tokens(lexer));
