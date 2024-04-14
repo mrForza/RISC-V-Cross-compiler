@@ -257,6 +257,7 @@ int main() {
         }
     }
     printf("Name: %s\nExtension: .%s\nSize: %llu bytes\n\n", handler.name, handler.extension, handler.size);
+
     delete_singleline_comments(handler);
     delete_multiline_comments(handler);
     fclose(handler.file_pointer);
