@@ -235,12 +235,12 @@ int main() {
     printf("%s\n", LOGO);
 
     while (true) {
-        char* file_name = "testfile.c";
+        char* file_name = get_full_name();
         if (validate_filename(file_name)) {
             char** splitted_info = split_full_name(file_name);
             char* name = splitted_info[0];
             char* extension = splitted_info[1];
-            open_file_pointer = fopen("testfile.c", "r");
+            open_file_pointer = fopen(file_name, "r");
             if (open_file_pointer) {
                 if (validate_file_existance(open_file_pointer)) {
                     handler.file_pointer = open_file_pointer;
