@@ -638,16 +638,16 @@ _operators:
 
     if (strcmp(expression.sign, "+=") == 0) {
         risc_v_assembly = concatenate(risc_v_assembly, "\n\tadd t0, t0, t1");
-        itoa(left + value, stack_context->variables[index].value, 10);
+        sprintf(stack_context->variables[index].value, "%d", left + value);
     } else if (strcmp(expression.sign, "-=") == 0) {
         risc_v_assembly = concatenate(risc_v_assembly, "\n\tsub t0, t0, t1");
-        itoa(left - value, stack_context->variables[index].value, 10);
+        sprintf(stack_context->variables[index].value, "%d", left - value);
     } else if (strcmp(expression.sign, "*=") == 0) {
         risc_v_assembly = concatenate(risc_v_assembly, "\n\tmul t0, t0, t1");
-        itoa(left * value, stack_context->variables[index].value, 10);
+        sprintf(stack_context->variables[index].value, "%d", left * value);
     } else if (strcmp(expression.sign, "/=") == 0) {
         risc_v_assembly = concatenate(risc_v_assembly, "\n\tdiv t0, t0, t1");
-        itoa(left / value, stack_context->variables[index].value, 10);
+        sprintf(stack_context->variables[index].value, "%d", left / value);
     }
 
     int current_stack_pointer = base_stack_pointer - (4 * index);
