@@ -236,7 +236,7 @@ int main() {
 
     while (true) {
         char* file_name = get_full_name();
-        if (validate_filename(file_name)) {
+        //if (validate_filename(file_name)) {
             char** splitted_info = split_full_name(file_name);
             char* name = splitted_info[0];
             char* extension = splitted_info[1];
@@ -254,7 +254,7 @@ int main() {
                     break;
                 }
             }
-        }
+        //}
     }
     printf("Name: %s\nExtension: .%s\nSize: %llu bytes\n\n", handler.name, handler.extension, handler.size);
 
