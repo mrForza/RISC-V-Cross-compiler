@@ -226,42 +226,36 @@ void print_syntax_constructions(struct Grammar* grammars, size_t size) {
 }
 
 
-int main() {
+int main(int argc, char** argv) {
     struct file_handler handler;
     FILE* open_file_pointer;
+    FILE* asm_file_pointer;
     char* buffer;
 
     printf("%s\n", GREETINGS_TEXT);
     printf("%s\n", LOGO);
 
-    while (true) {
-        char* file_name = get_full_name();
-        //if (validate_filename(file_name)) {
-            char** splitted_info = split_full_name(file_name);
-            char* name = splitted_info[0];
-            char* extension = splitted_info[1];
-            open_file_pointer = fopen(file_name, "r");
-            if (open_file_pointer) {
-                if (validate_file_existance(open_file_pointer)) {
-                    handler.file_pointer = open_file_pointer;
-                    handler.name = name;
-                    handler.extension = extension;
-                    fseek(open_file_pointer, 0L, SEEK_END);
-                    handler.size = ftell(open_file_pointer);
-                    fseek(open_file_pointer, 0L, SEEK_SET);
-                    buffer = (char*)malloc((handler.size + 1) * sizeof(char));
-                    fread(buffer, sizeof(char), handler.size, open_file_pointer);
-                    break;
-                }
-            }
-        //}
+    if (argc != 3) {
+        printf("Incorrect quantity of argument\n");
+        return -1;
     }
-    printf("Name: %s\nExtension: .%s\nSize: %llu bytes\n\n", handler.name, handler.extension, handler.size);
 
-    delete_singleline_comments(handler);
-    delete_multiline_comments(handler);
-    fclose(handler.file_pointer);
-    delete_repetitive_spaces(handler);
+    open_file_pointer = fopen(argv[1], "r");
+    if (open_file_pointer) {
+        fseek(open_file_pointer, 0L, SEEK_END);
+        handler.size = ftell(open_file_pointer);
+        fseek(open_file_pointer, 0L, SEEK_SET);
+        buffer = (char*)malloc((handler.size + 1) * sizeof(char));
+        fread(buffer, sizeof(char), handler.size, open_file_pointer);
+    } else {
+        printf("Cannot open file\n");
+        return -1;
+    }
+
+    // delete_singleline_comments(handler);
+    // delete_multiline_comments(handler);
+    // fclose(handler.file_pointer);
+    // delete_repetitive_spaces(handler);
 
     struct Lexer* lexer = (struct Lexer*)malloc(sizeof(struct Lexer));
     buffer[strlen(buffer)] = '\0';
@@ -280,6 +274,16 @@ int main() {
     printf("\n\n\n");
 
     printf("RISC_V ASSEMBLER:\n");
-    printf("%s", generate_assembly_for_grammars(grammars, quantity_of_grammars));
+    char* risc_v_assembly = generate_assembly_for_grammars(grammars, quantity_of_grammars);
+    printf("%s", risc_v_assembly);
+
+    asm_file_pointer = fopen(argv[2], "w");
+    if (asm_file_pointer) {
+        fwrite(risc_v_assembly, sizeof(char), strlen(risc_v_assembly), asm_file_pointer);
+        fclose(asm_file_pointer);
+    } else {
+        printf("Cannot open asm file for writing\n");
+        return -1;
+    }
     return 0;
 }
