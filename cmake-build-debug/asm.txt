@@ -1,0 +1,84 @@
+n1_0:
+	
+	li sp, 2147479548
+	li t0, 1
+	sw t0 (sp)
+	addi, sp, sp, -4
+n2_4:
+	
+	li sp, 2147479544
+	li t0, 1
+	sw t0 (sp)
+	addi, sp, sp, -4
+result_8:
+	
+	li sp, 2147479540
+	li t0, 0
+	sw t0 (sp)
+	addi, sp, sp, -4
+n_12:
+	
+	li sp, 2147479536
+	li t0, 5
+	sw t0 (sp)
+	addi, sp, sp, -4
+
+	while_condition:
+	
+	li t0, 5
+	addi, sp, sp, 4
+	lw t0, (sp)
+	li t1, 0
+	ble t0, t1, while_body
+	sw t0, (sp)
+	addi, sp, sp, -4
+	li t0, 0
+	li t1, 0
+	
+	while_body:
+	
+	li t0, 0
+	addi, sp, sp, 4
+	lw t0, (sp)
+	
+	li t1, 1
+	
+	sw t0, (sp)
+	addi, sp, sp, -4
+	li t0, 0
+	li t1, 0
+	
+	li t0, 1
+	addi, sp, sp, 4
+	lw t0, (sp)
+	
+	li t1, 1
+	
+	sw t0, (sp)
+	addi, sp, sp, -4
+	li t0, 0
+	li t1, 0
+	
+	li t0, 1
+	addi, sp, sp, 4
+	lw t0, (sp)
+	
+	li t1, 0
+	
+	sw t0, (sp)
+	addi, sp, sp, -4
+	li t0, 0
+	li t1, 0
+	ASSIGNMENT_0:
+	
+	li t0, 5
+	li t1, 1
+	sub t0, t0, t1
+	li sp, 2147479536
+	sw, t0, (sp)
+	li sp, 2147479532
+	li t0, 0
+	li t1, 0
+
+	j while_condition
+	while_end:

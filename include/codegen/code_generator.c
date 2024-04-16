@@ -12,6 +12,8 @@ int base_stack_pointer = 0x7fffeffc;
 
 bool is_initial_generation = true;
 
+int assignment_counter = 0;
+
 
 char* convert_int_to_string(int number) {
     int temp = number;
@@ -601,7 +603,10 @@ char* generate_assembly_for_for_statement(struct For statement) {
 
 
 char* generate_assembly_for_assignment_expression(struct Assignment_Expression expression) {
-    char* risc_v_assembly = "ASSIGNMENT:";
+    char* representation = malloc(2 * sizeof(char));
+    sprintf(representation, "%d", assignment_counter++);
+    char* risc_v_assembly = concatenate("ASSIGNMENT_", representation);
+    risc_v_assembly = concatenate(risc_v_assembly, ":\n\t");
 
     int index = get_variable_context_shift(*stack_context, (char*)expression.var_name);
     if (index == -1) {
