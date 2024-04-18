@@ -211,15 +211,14 @@ struct Grammar* get_intermediate_representation_for_scope(
             i = end_index + 1;
         } else {
             int semicolon_position = find_semicolon_position(tokens, i, end);
-            /*if (is_complex_definition_expression(tokens, &i, semicolon_position - 1)) {
-                struct Complex_Definition* expression
-                        = (struct Complex_Definition*)malloc(sizeof(struct Complex_Definition));
-                *expression = get_complex_definition(tokens, i, semicolon_position - 1);
+            if (is_general_assignment_expression(tokens, &i, semicolon_position - 1, is_error)) {
+                struct General_Assignment_Expression* expression
+                        = (struct General_Assignment_Expression*)malloc(sizeof(struct General_Assignment_Expression));
+                *expression = get_general_assignment_expression(tokens, i, semicolon_position - 1, is_error);
                 grammar.data = expression;
-                grammar.type = COMPLEX_DEFINITION;
+                grammar.type = GENERAL_ASSIGNMENT_EXPRESSION;
                 grammars[grammars_index++] = grammar;
-            }*/
-
+            }
             if (is_assignment_expression(tokens, &i, semicolon_position - 1, is_error)) {
                 struct Assignment_Expression* expression
                         = (struct Assignment_Expression*)malloc(sizeof(struct Assignment_Expression));
@@ -376,28 +375,46 @@ struct Relational_Expression get_relational_expression(void** tokens, int start,
     bool is_right = false;
     expression.is_left_expr = false;
     expression.is_right_expr = false;
-
+    int j = i + 1;
+    int index;
 _check_operand:
-    if (((struct Token *) (tokens[i]))->type == LEFT_ROUND_BRACKET) {
+    index = find_comparison_position(tokens, j, end);
+    if (((struct Token *) (tokens[i]))->type == LEFT_ROUND_BRACKET ||
+        (index != -1 && is_arithmetic_expression(tokens, &j, index, is_error))) {
         int close_bracket_pos = find_close_bracket_2(tokens, i, end + 1);
 
-        if (is_right) {
-            expression.is_right_expr = true;
-            expression.right_operand = (struct Arithmetic_Expression *) malloc(sizeof(struct Arithmetic_Expression));
-            *((struct Arithmetic_Expression *) (expression.right_operand)) = get_arithmetic_expression(
-                    tokens, i + 1, close_bracket_pos, is_error);
+        if (((struct Token *) (tokens[i]))->type == LEFT_ROUND_BRACKET) {
+            if (is_right) {
+                expression.is_right_expr = true;
+                expression.right_operand = (struct Arithmetic_Expression *) malloc(sizeof(struct Arithmetic_Expression));
+                *((struct Arithmetic_Expression *) (expression.right_operand)) = get_arithmetic_expression(
+                        tokens, i + 1, close_bracket_pos, is_error);
+            } else {
+                expression.is_left_expr = true;
+                expression.left_operand = (struct Arithmetic_Expression *) malloc(sizeof(struct Arithmetic_Expression));
+                *((struct Arithmetic_Expression *) (expression.left_operand)) = get_arithmetic_expression(
+                        tokens, i + 1, close_bracket_pos, is_error);
+            }
+            i = close_bracket_pos + 1;
         } else {
-            expression.is_left_expr = true;
-            expression.left_operand = (struct Arithmetic_Expression *) malloc(sizeof(struct Arithmetic_Expression));
-            *((struct Arithmetic_Expression *) (expression.left_operand)) = get_arithmetic_expression(
-                    tokens, i + 1, close_bracket_pos, is_error);
+            if (is_right) {
+                expression.is_right_expr = true;
+                expression.right_operand = (struct Arithmetic_Expression *) malloc(sizeof(struct Arithmetic_Expression));
+                *((struct Arithmetic_Expression *) (expression.right_operand)) = get_arithmetic_expression(
+                        tokens, i, index - 1, is_error);
+            } else {
+                expression.is_left_expr = true;
+                expression.left_operand = (struct Arithmetic_Expression *) malloc(sizeof(struct Arithmetic_Expression));
+                *((struct Arithmetic_Expression *) (expression.left_operand)) = get_arithmetic_expression(
+                        tokens, i, index - 1, is_error);
+            }
+            i = index;
         }
+
 
         if (i >= end) {
             return expression;
         }
-
-        i = close_bracket_pos + 1;
 
     } else {
         if (is_right) {
@@ -416,6 +433,7 @@ _check_operand:
         expression.operator = ((struct Token *)(tokens[i]))->attributes->text;
         ++i;
         is_right = true;
+        j = i;
         goto _check_operand;
     }
 
@@ -731,6 +749,31 @@ struct Assignment_Expression get_assignment_expression(void** tokens, int start,
 
     if (end - i - 2 > 1) {
         struct Arithmetic_Expression* arithm = (struct Arithmetic_Expression*)malloc(sizeof(struct Arithmetic_Expression));
+        *arithm = get_arithmetic_expression(tokens, i + 2, end, is_error);
+        expression.value = arithm;
+        expression.is_value_expression = true;
+    } else {
+        expression.value = ((struct Token*)(tokens[i + 2]))->attributes->text;
+        if (!check_string_is_number(expression.value)) {
+            expression.is_variable = true;
+        }
+    }
+
+    return expression;
+}
+
+
+struct General_Assignment_Expression get_general_assignment_expression(
+        void** tokens, int start, int end, int* is_error) {
+    struct General_Assignment_Expression expression;
+    int i = start;
+    expression.var_name = ((struct Token*)(tokens[i]))->attributes->text;
+    expression.is_value_expression = false;
+    expression.is_variable = false;
+
+    if (end - i - 2 > 1) {
+        struct Arithmetic_Expression* arithm =
+                (struct Arithmetic_Expression*)malloc(sizeof(struct Arithmetic_Expression));
         *arithm = get_arithmetic_expression(tokens, i + 2, end, is_error);
         expression.value = arithm;
         expression.is_value_expression = true;

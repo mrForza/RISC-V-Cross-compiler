@@ -15,11 +15,12 @@ enum Type_Of_Grammars {
     FOR_STATEMENT = 10,
     FUNCTION_DECLARATION = 11,
     ASSIGNMENT_EXPRESSION = 12,
-    READ_INT = 13,
-    WRITE_INT = 14,
-    READ_CHAR = 15,
-    WRITE_CHAR = 16,
-    UNKNOWN = 17
+    GENERAL_ASSIGNMENT_EXPRESSION = 13,
+    READ_INT = 14,
+    WRITE_INT = 15,
+    READ_CHAR = 16,
+    WRITE_CHAR = 17,
+    UNKNOWN = 18
 };
 
 
@@ -89,6 +90,14 @@ struct Complex_Definition {
 struct Assignment_Expression {
     char* var_name;
     char* sign;
+    void* value;
+    bool is_value_expression;
+    bool is_variable;
+};
+
+
+struct General_Assignment_Expression {
+    char* var_name;
     void* value;
     bool is_value_expression;
     bool is_variable;

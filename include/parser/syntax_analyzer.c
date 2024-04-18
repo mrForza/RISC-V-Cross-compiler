@@ -19,6 +19,16 @@ int find_close_bracket(void** tokens, int start_position, int size) {
 }
 
 
+int find_comparison_position(void** tokens, int start_position, int size) {
+    for (int i = start_position; i < size; ++i) {
+        if (((struct Token*)(tokens[i]))->type == COMPARISON_OPERATOR) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+
 int find_close_curly_bracket(void** tokens, int start_position, int size) {
     int counter = 0;
     for (int i = start_position; i <= size; ++i) { // !!!!!!!!!!!!!!!!!!!!
@@ -117,9 +127,12 @@ bool is_relational_expression(void** tokens, const int* start_position, int size
             return true;
         }
     } else {
+        int index = find_comparison_position(tokens, i, size);
         if (((struct Token*)(tokens[i]))->type == DOUBLE_LITERAL ||
             ((struct Token*)(tokens[i]))->type == DECIMAL_INT_LITERAL ||
-            ((struct Token*)(tokens[i]))->type == IDENTIFIER) {
+            ((struct Token*)(tokens[i]))->type == IDENTIFIER ||
+            (index != -1 && is_arithmetic_expression(tokens, &i, index - 1, is_error))) {
+            i = index;
             if (i == size - 1) {
                 return true;
             }
@@ -149,9 +162,11 @@ bool is_relational_expression(void** tokens, const int* start_position, int size
             return true;
         }
     } else {
+        int index = find_comparison_position(tokens, i, size);
         if (((struct Token*)(tokens[i]))->type == DOUBLE_LITERAL || // ?????
             ((struct Token*)(tokens[i]))->type == DECIMAL_INT_LITERAL ||
-            ((struct Token*)(tokens[i]))->type == IDENTIFIER) {
+            ((struct Token*)(tokens[i]))->type == IDENTIFIER ||
+            (index != -1 && is_arithmetic_expression(tokens, &i, index - 1, is_error))) {
             if (i == size - 1) {
                 return true;
             }
@@ -572,7 +587,7 @@ bool is_for_statement(void** tokens, const int* start_position, int size, int* i
 }
 
 
-bool is_assignment_expression(void** tokens, const int* start_position, int size, bool* is_error) {
+bool is_assignment_expression(void** tokens, const int* start_position, int size, int* is_error) {
     int i = *start_position;
 
     if (((struct Token*)(tokens[i]))->type == IDENTIFIER) {
@@ -584,6 +599,28 @@ bool is_assignment_expression(void** tokens, const int* start_position, int size
             } else {
                 if (((struct Token*)(tokens[i]))->type == DECIMAL_INT_LITERAL ||
                     ((struct Token*)(tokens[i]))->type == CHAR_LITERAL) {
+                    return true;
+                }
+            }
+        }
+    }
+    return false;
+}
+
+
+bool is_general_assignment_expression(void** tokens, const int* start_position, int size, int* is_error) {
+    int i = *start_position;
+
+    if (((struct Token*)(tokens[i]))->type == IDENTIFIER) {
+        ++i;
+        if (((struct Token*)(tokens[i]))->type == ASSIGN_OPERATOR) {
+            ++i;
+            if (is_arithmetic_expression(tokens, &i, size, is_error)) {
+                return true;
+            } else {
+                if (((struct Token*)(tokens[i]))->type == DECIMAL_INT_LITERAL ||
+                    ((struct Token*)(tokens[i]))->type == CHAR_LITERAL ||
+                    ((struct Token*)(tokens[i]))->type == IDENTIFIER) {
                     return true;
                 }
             }

@@ -221,6 +221,9 @@ void print_syntax_constructions(struct Grammar* grammars, size_t size) {
             case ASSIGNMENT_EXPRESSION:
                 printf("ASSIGNMENT_EXPRESSION\n\n");
                 break;
+            case GENERAL_ASSIGNMENT_EXPRESSION:
+                printf("GENERAL_ASSIGNMENT_EXPRESSION\n\n");
+                break;
             case READ_INT:
                 printf("READ_INT\n\n");
                 break;

@@ -52,3 +52,7 @@ struct Read_Int_Function get_read_int(void** tokens, int start, int end, int* is
 
 
 struct Write_Int_Function get_write_int(void** tokens, int start, int end, int* is_error);
+
+
+struct General_Assignment_Expression get_general_assignment_expression(
+        void** tokens, int start, int end, int* is_error);
