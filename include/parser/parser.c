@@ -375,46 +375,28 @@ struct Relational_Expression get_relational_expression(void** tokens, int start,
     bool is_right = false;
     expression.is_left_expr = false;
     expression.is_right_expr = false;
-    int j = i + 1;
-    int index;
-_check_operand:
-    index = find_comparison_position(tokens, j, end);
-    if (((struct Token *) (tokens[i]))->type == LEFT_ROUND_BRACKET ||
-        (index != -1 && is_arithmetic_expression(tokens, &j, index, is_error))) {
+
+    _check_operand:
+    if (((struct Token *) (tokens[i]))->type == LEFT_ROUND_BRACKET) {
         int close_bracket_pos = find_close_bracket_2(tokens, i, end + 1);
 
-        if (((struct Token *) (tokens[i]))->type == LEFT_ROUND_BRACKET) {
-            if (is_right) {
-                expression.is_right_expr = true;
-                expression.right_operand = (struct Arithmetic_Expression *) malloc(sizeof(struct Arithmetic_Expression));
-                *((struct Arithmetic_Expression *) (expression.right_operand)) = get_arithmetic_expression(
-                        tokens, i + 1, close_bracket_pos, is_error);
-            } else {
-                expression.is_left_expr = true;
-                expression.left_operand = (struct Arithmetic_Expression *) malloc(sizeof(struct Arithmetic_Expression));
-                *((struct Arithmetic_Expression *) (expression.left_operand)) = get_arithmetic_expression(
-                        tokens, i + 1, close_bracket_pos, is_error);
-            }
-            i = close_bracket_pos + 1;
+        if (is_right) {
+            expression.is_right_expr = true;
+            expression.right_operand = (struct Arithmetic_Expression *) malloc(sizeof(struct Arithmetic_Expression));
+            *((struct Arithmetic_Expression *) (expression.right_operand)) = get_arithmetic_expression(
+                    tokens, i + 1, close_bracket_pos, is_error);
         } else {
-            if (is_right) {
-                expression.is_right_expr = true;
-                expression.right_operand = (struct Arithmetic_Expression *) malloc(sizeof(struct Arithmetic_Expression));
-                *((struct Arithmetic_Expression *) (expression.right_operand)) = get_arithmetic_expression(
-                        tokens, i, index - 1, is_error);
-            } else {
-                expression.is_left_expr = true;
-                expression.left_operand = (struct Arithmetic_Expression *) malloc(sizeof(struct Arithmetic_Expression));
-                *((struct Arithmetic_Expression *) (expression.left_operand)) = get_arithmetic_expression(
-                        tokens, i, index - 1, is_error);
-            }
-            i = index;
+            expression.is_left_expr = true;
+            expression.left_operand = (struct Arithmetic_Expression *) malloc(sizeof(struct Arithmetic_Expression));
+            *((struct Arithmetic_Expression *) (expression.left_operand)) = get_arithmetic_expression(
+                    tokens, i + 1, close_bracket_pos, is_error);
         }
-
 
         if (i >= end) {
             return expression;
         }
+
+        i = close_bracket_pos + 1;
 
     } else {
         if (is_right) {
@@ -433,7 +415,6 @@ _check_operand:
         expression.operator = ((struct Token *)(tokens[i]))->attributes->text;
         ++i;
         is_right = true;
-        j = i;
         goto _check_operand;
     }
 
