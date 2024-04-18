@@ -44,6 +44,9 @@ char* concatenate_string_int(const char* string, unsigned long long number) {
 
 
 char* multiply_string(char* string, int quantity) {
+    if (quantity == 0) {
+        return "";
+    }
     char* result_string = (char*)malloc(quantity * sizeof(strlen(string)));
     for (int i = 0; i < quantity; ++i) {
         result_string = concatenate(result_string, string);

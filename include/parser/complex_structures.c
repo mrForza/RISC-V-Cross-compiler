@@ -14,7 +14,13 @@ enum Type_Of_Grammars {
     WHILE_STATEMENT = 9,
     FOR_STATEMENT = 10,
     FUNCTION_DECLARATION = 11,
-    ASSIGNMENT_EXPRESSION = 12
+    ASSIGNMENT_EXPRESSION = 12,
+    GENERAL_ASSIGNMENT_EXPRESSION = 13,
+    READ_INT = 14,
+    WRITE_INT = 15,
+    READ_CHAR = 16,
+    WRITE_CHAR = 17,
+    UNKNOWN = 18
 };
 
 
@@ -90,6 +96,14 @@ struct Assignment_Expression {
 };
 
 
+struct General_Assignment_Expression {
+    char* var_name;
+    void* value;
+    bool is_value_expression;
+    bool is_variable;
+};
+
+
 struct If_Else {
     struct Grammar* conditions; // n
     struct Grammar** bodies; // n + 1
@@ -118,5 +132,21 @@ struct Do_While {
 
 
 struct For {
+
+};
+
+
+struct Read_Int_Function {
+    char* var_name;
+};
+
+
+struct Write_Int_Function {
+    char* value;
+    bool is_var;
+};
+
+
+struct Unknown {
 
 };
