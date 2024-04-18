@@ -219,7 +219,13 @@ void print_syntax_constructions(struct Grammar* grammars, size_t size) {
                 printf("FUNCTION_DECLARATION\n\n");
                 break;
             case ASSIGNMENT_EXPRESSION:
-                printf("ASSIGNMENT_EXPRESSION\n");
+                printf("ASSIGNMENT_EXPRESSION\n\n");
+                break;
+            case READ_INT:
+                printf("READ_INT\n\n");
+                break;
+            case WRITE_INT:
+                printf("WRITE_INT\n\n");
                 break;
         }
     }
@@ -268,22 +274,26 @@ int main(int argc, char** argv) {
     *parser = init_parser(lexer);
 
     int quantity_of_grammars = 0;
-    struct Grammar* grammars = start_parsing(parser, &quantity_of_grammars);
-    printf("SYNTAX CONSTRUCTIONS:\n");
+    int is_errors_were_occurred = 0;
+    struct Grammar* grammars = start_parsing(parser, &quantity_of_grammars, &is_errors_were_occurred);
+    printf("\n\nSYNTAX CONSTRUCTIONS:\n");
     print_syntax_constructions(grammars, quantity_of_grammars);
     printf("\n\n\n");
 
-    printf("RISC_V ASSEMBLER:\n");
-    char* risc_v_assembly = generate_assembly_for_grammars(grammars, quantity_of_grammars);
-    printf("%s", risc_v_assembly);
+    if (!is_errors_were_occurred) {
+        printf("RISC_V ASSEMBLER:\n");
+        char* risc_v_assembly = generate_assembly_for_grammars(grammars, quantity_of_grammars);
+        printf("%s", risc_v_assembly);
 
-    asm_file_pointer = fopen(argv[2], "w");
-    if (asm_file_pointer) {
-        fwrite(risc_v_assembly, sizeof(char), strlen(risc_v_assembly), asm_file_pointer);
-        fclose(asm_file_pointer);
-    } else {
-        printf("Cannot open asm file for writing\n");
-        return -1;
+        asm_file_pointer = fopen(argv[2], "w");
+        if (asm_file_pointer) {
+            fwrite(risc_v_assembly, sizeof(char), strlen(risc_v_assembly), asm_file_pointer);
+            fclose(asm_file_pointer);
+        } else {
+            printf("Cannot open asm file for writing\n");
+            return -1;
+        }
     }
+
     return 0;
 }

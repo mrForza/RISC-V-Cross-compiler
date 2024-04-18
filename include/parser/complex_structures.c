@@ -14,7 +14,12 @@ enum Type_Of_Grammars {
     WHILE_STATEMENT = 9,
     FOR_STATEMENT = 10,
     FUNCTION_DECLARATION = 11,
-    ASSIGNMENT_EXPRESSION = 12
+    ASSIGNMENT_EXPRESSION = 12,
+    READ_INT = 13,
+    WRITE_INT = 14,
+    READ_CHAR = 15,
+    WRITE_CHAR = 16,
+    UNKNOWN = 17
 };
 
 
@@ -118,5 +123,21 @@ struct Do_While {
 
 
 struct For {
+
+};
+
+
+struct Read_Int_Function {
+    char* var_name;
+};
+
+
+struct Write_Int_Function {
+    char* value;
+    bool is_var;
+};
+
+
+struct Unknown {
 
 };

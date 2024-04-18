@@ -69,7 +69,10 @@ char* generate_assembly_for_unknown_grammar(struct Grammar grammar) {
     struct Do_While do_while_statement;
     struct While while_statement;
     struct Assignment_Expression assignment_expression;
+    struct Read_Int_Function read_int;
+    struct Write_Int_Function write_int;
     char* risc_v_assembly = "";
+
     switch (grammar.type) {
         case SINGLE_DECLARATION:
             single_declaration = *(struct Single_Declaration*)grammar.data;
@@ -130,6 +133,18 @@ char* generate_assembly_for_unknown_grammar(struct Grammar grammar) {
             risc_v_assembly = concatenate(
                     risc_v_assembly,
                     generate_assembly_for_assignment_expression(assignment_expression));
+            break;
+        case READ_INT:
+            read_int = *(struct Read_Int_Function*)grammar.data;
+            risc_v_assembly = concatenate(
+                    risc_v_assembly,
+                    generate_assembly_for_read_int_function(read_int));
+            break;
+        case WRITE_INT:
+            write_int = *(struct Write_Int_Function*)grammar.data;
+            risc_v_assembly = concatenate(
+                    risc_v_assembly,
+                    generate_assembly_for_write_int_function(write_int));
             break;
     }
 
@@ -434,14 +449,22 @@ char* generate_assembly_for_relational_expression(struct Relational_Expression e
                                           concatenate("\n\tli t0, ", expression.left_operand));
         } else {
             int index = get_variable_context_shift(*stack_context, (char*)expression.left_operand);
-            if (index == -1) {
+            if (index  == -1) {
                 printf("SEMANTIC ERROR: No variable %s in current stack scope!", (char*)expression.left_operand);
                 return "";
             }
-            risc_v_assembly = concatenate(risc_v_assembly,
-                                          concatenate("\n\tli t0, ", stack_context->variables[index].value));
+            risc_v_assembly = concatenate(
+                    risc_v_assembly,
+                    concatenate("\n\taddi, sp, sp, ",
+                                convert_int_to_string((stack_context->size - index) * 4)));
+            risc_v_assembly = concatenate(risc_v_assembly, "\n\tlw, t0, (sp)");
+            risc_v_assembly = concatenate(
+                    risc_v_assembly,
+                    concatenate(
+                            "\n\taddi, sp, sp, -",
+                            convert_int_to_string((stack_context->size - index) * 4)));
         }
-        risc_v_assembly = concatenate(risc_v_assembly, "\n\t");
+        risc_v_assembly = concatenate(risc_v_assembly, "\n\tsw t0, (sp)\n\taddi sp, sp, -4\n\t");
     }
 
 
@@ -459,14 +482,21 @@ char* generate_assembly_for_relational_expression(struct Relational_Expression e
             risc_v_assembly = concatenate(risc_v_assembly, (char*)expression.right_operand);
         } else {
             int index = get_variable_context_shift(*stack_context, (char*)expression.right_operand);
-            if (index == -1) {
+            if (index  == -1) {
                 printf("SEMANTIC ERROR: No variable %s in current stack scope!", (char*)expression.right_operand);
                 return "";
             }
-            risc_v_assembly = concatenate(risc_v_assembly, "\n\tli t1, ");
-            risc_v_assembly = concatenate(risc_v_assembly, stack_context->variables[index].value);
+            risc_v_assembly = concatenate(
+                    risc_v_assembly,
+                    concatenate("\n\taddi, sp, sp, ",
+                                convert_int_to_string((stack_context->size - index) * 4)));
+            risc_v_assembly = concatenate(risc_v_assembly, "\n\tlw, t1, (sp)");
+            risc_v_assembly = concatenate(
+                    risc_v_assembly,
+                    concatenate(
+                            "\n\taddi, sp, sp, -",
+                            convert_int_to_string((stack_context->size - index) * 4)));
         }
-        risc_v_assembly = concatenate(risc_v_assembly, "\n\t");
         goto _operators;
     }
 
@@ -475,59 +505,59 @@ _operators:
         if (strcmp(expression.operator, "==") == 0) {
             risc_v_assembly = concatenate(
                     risc_v_assembly,
-                    concatenate("beq t0, t1, ", label));
+                    concatenate("\n\tbeq t0, t1, ", label));
         } else if (strcmp(expression.operator, "!=") == 0) {
             risc_v_assembly = concatenate(
                     risc_v_assembly,
-                    concatenate("bne t0, t1, ", label));
+                    concatenate("\n\tbne t0, t1, ", label));
         } else if (strcmp(expression.operator, "<") == 0) {
             risc_v_assembly = concatenate(
                     risc_v_assembly,
-                    concatenate("blt t0, t1, ", label));
+                    concatenate("\n\tblt t0, t1, ", label));
         } else if (strcmp(expression.operator, ">") == 0) {
             risc_v_assembly = concatenate(
                     risc_v_assembly,
-                    concatenate("bgt t0, t1, ", label));
+                    concatenate("\n\tbgt t0, t1, ", label));
         } else if (strcmp(expression.operator, "<=") == 0) {
             risc_v_assembly = concatenate(
                     risc_v_assembly,
-                    concatenate("ble t0, t1, ", label));
+                    concatenate("\n\tble t0, t1, ", label));
         } else if (strcmp(expression.operator, ">=") == 0) {
             risc_v_assembly = concatenate(
                     risc_v_assembly,
-                    concatenate("bge t0, t1, ", label));
+                    concatenate("\n\tbge t0, t1, ", label));
         }
     } else {
         if (strcmp(expression.operator, "==") == 0) {
             risc_v_assembly = concatenate(
                     risc_v_assembly,
-                    concatenate("bne t0, t1, ", label));
+                    concatenate("\n\tbne t0, t1, ", cancel_label));
         } else if (strcmp(expression.operator, "!=") == 0) {
             risc_v_assembly = concatenate(
                     risc_v_assembly,
-                    concatenate("beq t0, t1, ", label));
+                    concatenate("\n\tbeq t0, t1, ", cancel_label));
         } else if (strcmp(expression.operator, "<") == 0) {
             risc_v_assembly = concatenate(
                     risc_v_assembly,
-                    concatenate("bge t0, t1, ", label));
+                    concatenate("\n\tbge t0, t1, ", cancel_label));
         } else if (strcmp(expression.operator, ">") == 0) {
             risc_v_assembly = concatenate(
                     risc_v_assembly,
-                    concatenate("ble t0, t1, ", label));
+                    concatenate("\n\tble t0, t1, ", cancel_label));
         } else if (strcmp(expression.operator, "<=") == 0) {
             risc_v_assembly = concatenate(
                     risc_v_assembly,
-                    concatenate("bgt t0, t1, ", label));
+                    concatenate("\n\tbgt t0, t1, ", cancel_label));
         } else if (strcmp(expression.operator, ">=") == 0) {
             risc_v_assembly = concatenate(
                     risc_v_assembly,
-                    concatenate("blt t0, t1, ", label));
+                    concatenate("\n\tblt t0, t1, ", cancel_label));
         }
     }
 
 
     risc_v_assembly = concatenate(risc_v_assembly,
-                                  "\n\tsw t0, (sp)\n\taddi, sp, sp, -4\n\tli t0, 0\n\tli t1, 0\n\t");
+                                  "\n\tsw t0, (sp)\n\taddi, sp, sp, -4\n\0");
 
     return risc_v_assembly;
 }
@@ -620,26 +650,41 @@ char* generate_assembly_for_assignment_expression(struct Assignment_Expression e
     risc_v_assembly = concatenate(risc_v_assembly, ":\n\t");
 
     int index = get_variable_context_shift(*stack_context, (char*)expression.var_name);
-    if (index == -1) {
+    if (index  == -1) {
         printf("SEMANTIC ERROR: No variable %s in current stack scope!", (char*)expression.var_name);
         return "";
     }
-    risc_v_assembly = concatenate(risc_v_assembly,
-                                  concatenate("\n\tli t0, ",
-                                              stack_context->variables[index].value));
+    risc_v_assembly = concatenate(
+            risc_v_assembly,
+            concatenate("\n\taddi, sp, sp, ",
+                        convert_int_to_string((stack_context->size - index) * 4)));
+    risc_v_assembly = concatenate(risc_v_assembly, "\n\tlw, t0, (sp)");
+    risc_v_assembly = concatenate(
+            risc_v_assembly,
+            concatenate(
+                    "\n\taddi, sp, sp, -",
+                    convert_int_to_string((stack_context->size - index) * 4)));
 
     if (expression.is_value_expression) {
         risc_v_assembly = concatenate(risc_v_assembly, generate_assembly_for_arithmetic_expression(
                 *((struct Arithmetic_Expression*)(expression.value))));
     } else {
         if (expression.is_variable) {
-            index = get_variable_context_shift(*stack_context, (char*)expression.value);
-            if (index == -1) {
+            int index = get_variable_context_shift(*stack_context, (char*)expression.value);
+            if (index  == -1) {
                 printf("SEMANTIC ERROR: No variable %s in current stack scope!", (char*)expression.value);
                 return "";
             }
-            risc_v_assembly = concatenate(risc_v_assembly, "\n\tli t1, ");
-            risc_v_assembly = concatenate(risc_v_assembly, stack_context->variables[index].value);
+            risc_v_assembly = concatenate(
+                    risc_v_assembly,
+                    concatenate("\n\taddi, sp, sp, ",
+                                convert_int_to_string((stack_context->size - index) * 4)));
+            risc_v_assembly = concatenate(risc_v_assembly, "\n\tlw, t1, (sp)");
+            risc_v_assembly = concatenate(
+                    risc_v_assembly,
+                    concatenate(
+                            "\n\taddi, sp, sp, -",
+                            convert_int_to_string((stack_context->size - index) * 4)));
         } else {
             risc_v_assembly = concatenate(
                     risc_v_assembly,
@@ -677,5 +722,61 @@ _operators:
     risc_v_assembly = concatenate(risc_v_assembly, "\n\tli t0, 0");
     risc_v_assembly = concatenate(risc_v_assembly, "\n\tli t1, 0\n\0");
 
+    return risc_v_assembly;
+}
+
+
+char* generate_assembly_for_read_int_function(struct Read_Int_Function read_int) {
+    char* risc_v_assembly = "\n\tli a7, 5";
+    risc_v_assembly = concatenate(risc_v_assembly, "\n\tecall");
+
+    int index = get_variable_context_shift(*stack_context, read_int.var_name);
+    if (index  == -1) {
+        printf("SEMANTIC ERROR: No variable %s in current stack scope!", read_int.var_name);
+        return "";
+    }
+    risc_v_assembly = concatenate(risc_v_assembly, "\n\tmv t0, a0");
+    risc_v_assembly = concatenate(
+            risc_v_assembly,
+            concatenate("\n\taddi, sp, sp, ",
+                        convert_int_to_string((stack_context->size - index) * 4)));
+    risc_v_assembly = concatenate(risc_v_assembly, "\n\tsw, t0, (sp)");
+    risc_v_assembly = concatenate(
+            risc_v_assembly,
+            concatenate(
+                    "\n\taddi, sp, sp, -",
+                    convert_int_to_string((stack_context->size - index) * 4)));
+    risc_v_assembly = concatenate(risc_v_assembly, "\n");
+    return risc_v_assembly;
+}
+
+
+char* generate_assembly_for_write_int_function(struct Write_Int_Function write_int) {
+    char* risc_v_assembly = "\n\tli a7, 1";
+
+    if (write_int.is_var) {
+        int index = get_variable_context_shift(*stack_context, write_int.value);
+        if (index  == -1) {
+            printf("SEMANTIC ERROR: No variable %s in current stack scope!", write_int.value);
+            return "";
+        }
+        risc_v_assembly = concatenate(
+                risc_v_assembly,
+                concatenate("\n\taddi, sp, sp, ",
+                            convert_int_to_string((stack_context->size - index) * 4)));
+        risc_v_assembly = concatenate(risc_v_assembly, "\n\tlw, t0, (sp)");
+        risc_v_assembly = concatenate(
+                risc_v_assembly,
+                concatenate(
+                        "\n\taddi, sp, sp, -",
+                        convert_int_to_string((stack_context->size - index) * 4)));
+        risc_v_assembly = concatenate(risc_v_assembly, "\n\tmv a0, t0");
+    } else {
+        risc_v_assembly = concatenate(
+                risc_v_assembly,
+                concatenate("\n\tli a0, ", write_int.value));
+    }
+
+    risc_v_assembly = concatenate(risc_v_assembly, "\n\tecall");
     return risc_v_assembly;
 }

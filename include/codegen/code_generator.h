@@ -61,3 +61,9 @@ char* generate_assembly_for_for_statement(struct For statement);
 
 
 char* generate_assembly_for_assignment_expression(struct Assignment_Expression expression);
+
+
+char* generate_assembly_for_read_int_function(struct Read_Int_Function read_int);
+
+
+char* generate_assembly_for_write_int_function(struct Write_Int_Function write_int);

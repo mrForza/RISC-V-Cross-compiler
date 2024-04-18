@@ -5,66 +5,33 @@ a_0:
 	addi, sp, sp, -4
 b_4:
 	
-	li t0, 2
+	li t0, 380
 	sw t0 (sp)
 	addi, sp, sp, -4
 c_8:
 	
-	addi, sp, sp, 8
-	lw, t0, (sp)
-	addi, sp, sp, -8
-	sw t0, (sp)
+	li t0 0
+	sw t0 (sp)
 	addi sp, sp, -4
+
+	li a7, 5
+	ecall
+	mv t0, a0
 	addi, sp, sp, 4
-	lw t0, (sp)
-	
-	addi, sp, sp, 4
-	lw, t1, (sp)
-	addi, sp, sp, -4
-	add t0, t0, t1
-	sw t0, (sp)
-	addi, sp, sp, -4
-d_12:
-	
-	addi, sp, sp, 4
-	lw, t0, (sp)
-	addi, sp, sp, -4
-	sw t0, (sp)
-	addi sp, sp, -4
-	addi, sp, sp, 4
-	lw t0, (sp)
-	
-	addi, sp, sp, 8
-	lw, t1, (sp)
-	addi, sp, sp, -8
-	add t0, t0, t1
-	sw t0, (sp)
-	addi, sp, sp, -4
-addi, sp, sp, 4
-	lw t0, (sp)
-	
-	li t1, 2
-	mul t0, t0, t1
-	sw t0, (sp)
+	sw, t0, (sp)
 	addi, sp, sp, -4
 
-	li t0, 4
-	sw t0, (sp)
-	addi sp, sp, -4
-	addi, sp, sp, 4
-	lw t0, (sp)
+	li a7, 1
+	li a0, 888
+	ecalld_12:
 	
-	li t1, 1
-	mul t0, t0, t1
-	sw t0, (sp)
+	li t0, 555
+	sw t0 (sp)
 	addi, sp, sp, -4
-addi, sp, sp, 4
-	lw t1, (sp)
-	sw, t6, (sp)
-	addi, sp, sp, 4
-	lw t0, (sp)
-	sw, t6, (sp)
-	
-	sub t0, t0, t1
-	sw t0, (sp)
-	addi, sp, sp, -4
+
+	li a7, 1
+	addi, sp, sp, 12
+	lw, t0, (sp)
+	addi, sp, sp, -12
+	mv a0, t0
+	ecall

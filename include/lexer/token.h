@@ -45,7 +45,7 @@ enum Type_Of_Token {
     COMMA = 38,
     INCORRECT = 39,
     END = 40,
-    MULTIPLICATION_SIGN = 41
+    MULTIPLICATION_SIGN = 41,
 };
 
 
