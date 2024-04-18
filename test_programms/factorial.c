@@ -1,8 +1,10 @@
 int main() {
-    int n = 5;
+    int n;
     int result = 1;
+    read_int(n);
     while (n > 0) {
-        result *= n;
-        n -= 1;
+        result = result * n;
+        n = n - 1;
     }
+    write_int(result);
 }

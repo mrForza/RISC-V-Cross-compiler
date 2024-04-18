@@ -1,12 +1,14 @@
 int main() {
-    int n1 = 1;
-    int n2 = 1;
-    int result = 0;
-    int n = 5;
-    while (n > 0) {
-        result = n1 + n2;
-        n1 = n2;
-        n2 = result;
-        n -= 1;
+    int n;
+    read_int(n);
+    int ai = 1;
+    int ai2 = 1;
+    int result;
+    while (n - 2 > 0) {
+        result = ai + ai2;
+        ai = ai2;
+        ai2 = result;
+        n = n - 1;
     }
+    write_int(result);
 }
