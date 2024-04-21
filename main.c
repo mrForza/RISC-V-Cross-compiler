@@ -160,8 +160,7 @@ void print_syntax_constructions(struct Grammar* grammars, size_t size) {
         struct If_Else if_else_statement;
         struct While while_statement;
         struct Do_While do_while_statement;
-        struct For for_statement;
-
+        struct Function_Declaration function_declaration;
         switch (grammars[i].type) {
             case SINGLE_DECLARATION:
                 printf("%s", concatenate(multiply_string("\t", global_tab_counter), "SINGLE_DECLARATION\n\n"));
@@ -216,7 +215,14 @@ void print_syntax_constructions(struct Grammar* grammars, size_t size) {
                 printf("FOR_STATEMENT\n\n");
                 break;
             case FUNCTION_DECLARATION:
-                printf("FUNCTION_DECLARATION\n\n");
+                function_declaration = *((struct Function_Declaration*)grammars[i].data);
+                printf("%s", concatenate(multiply_string("\t", global_tab_counter), "FUNCTION_DECLARATION\n"));
+                ++global_tab_counter;
+                print_syntax_constructions(function_declaration.body, function_declaration.quantity_of_grammars);
+                --global_tab_counter;
+                break;
+            case FUNCTION_CALLING:
+                printf("FUNCTION_CALLING\n\n");
                 break;
             case ASSIGNMENT_EXPRESSION:
                 printf("ASSIGNMENT_EXPRESSION\n\n");
@@ -229,6 +235,15 @@ void print_syntax_constructions(struct Grammar* grammars, size_t size) {
                 break;
             case WRITE_INT:
                 printf("WRITE_INT\n\n");
+                break;
+            case READ_CHAR:
+                printf("READ_CHAR\n\n");
+                break;
+            case WRITE_CHAR:
+                printf("WRITE_CHAR\n\n");
+                break;
+            case UNKNOWN:
+                printf("UNKNOWN\n\n");
                 break;
         }
     }

@@ -647,17 +647,35 @@ bool is_function_declaration(void** tokens, const int* start_position, int end, 
                     return false;
                 }
                 ++i;
-                if (is_complex_declaration_expression(tokens, &i, closed_round_brackets - 1, is_error)) {
-                    i = closed_round_brackets + 1;
-                    if (((struct Token*)(tokens[i]))->type == LEFT_CURLY_BRACKET) {
-                        int closed_curly_index = find_close_curly_bracket(tokens, i, end);
-                        if (closed_curly_index == -1) {
-                            printf("SYNTAX ERROR: No closed curly brackets!");
-                            *is_error = 1;
-                            return false;
+
+                _get_arguments:
+                if (((struct Token*)(tokens[i]))->type == CHAR ||
+                    ((struct Token*)(tokens[i]))->type == INT ||
+                    ((struct Token*)(tokens[i]))->type == DOUBLE) {
+                    ++i;
+                    if (((struct Token*)(tokens[i]))->type == IDENTIFIER) {
+                        ++i;
+                        if (((struct Token*)(tokens[i]))->type == COMMA) {
+                            goto _get_arguments;
+                        } else if (((struct Token*)(tokens[i]))->type == RIGHT_ROUND_BRACKET) {
+                            goto _check_curly_brackets;
                         }
-                        return true;
                     }
+                    printf("SYNTAX ERROR: Incorrect function arguments!");
+                    *is_error = 1;
+                    return false;
+                }
+
+            _check_curly_brackets:
+                i = closed_round_brackets + 1;
+                if (((struct Token*)(tokens[i]))->type == LEFT_CURLY_BRACKET) {
+                    int closed_curly_index = find_close_curly_bracket(tokens, i, end);
+                    if (closed_curly_index == -1) {
+                        printf("SYNTAX ERROR: No closed curly brackets!");
+                        *is_error = 1;
+                        return false;
+                    }
+                    return true;
                 }
             }
         }
@@ -673,7 +691,7 @@ bool is_function_calling(void** tokens, const int* start_position, int end, int*
     if (((struct Token*)(tokens[i]))->type == IDENTIFIER) {
         ++i;
         if (((struct Token*)(tokens[i]))->type == LEFT_ROUND_BRACKET) {
-            int closed_round_brackets = find_close_bracket(tokens, i, end);
+            int closed_round_brackets = find_close_bracket(tokens, i, end + 1);
             if (closed_round_brackets == -1) {
                 printf("SYNTAX ERROR: No closed round brackets!");
                 *is_error = 1;
@@ -681,7 +699,10 @@ bool is_function_calling(void** tokens, const int* start_position, int end, int*
             }
             ++i;
             while (i < closed_round_brackets) {
-                if (((struct Token*)(tokens[i]))->type == IDENTIFIER) {
+                if (((struct Token*)(tokens[i]))->type == IDENTIFIER ||
+                    ((struct Token*)(tokens[i]))->type == CHAR_LITERAL ||
+                    ((struct Token*)(tokens[i]))->type == DECIMAL_INT_LITERAL ||
+                    ((struct Token*)(tokens[i]))->type == DOUBLE_LITERAL) {
                     ++i;
                 }
                 if (((struct Token*)(tokens[i]))->type == COMMA) {

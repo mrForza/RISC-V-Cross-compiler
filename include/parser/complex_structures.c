@@ -14,13 +14,14 @@ enum Type_Of_Grammars {
     WHILE_STATEMENT = 9,
     FOR_STATEMENT = 10,
     FUNCTION_DECLARATION = 11,
-    ASSIGNMENT_EXPRESSION = 12,
-    GENERAL_ASSIGNMENT_EXPRESSION = 13,
-    READ_INT = 14,
-    WRITE_INT = 15,
-    READ_CHAR = 16,
-    WRITE_CHAR = 17,
-    UNKNOWN = 18
+    FUNCTION_CALLING = 12,
+    ASSIGNMENT_EXPRESSION = 13,
+    GENERAL_ASSIGNMENT_EXPRESSION = 14,
+    READ_INT = 15,
+    WRITE_INT = 16,
+    READ_CHAR = 17,
+    WRITE_CHAR = 18,
+    UNKNOWN = 19,
 };
 
 
@@ -144,6 +145,28 @@ struct Read_Int_Function {
 struct Write_Int_Function {
     char* value;
     bool is_var;
+};
+
+
+struct Function_Argument {
+    char** types;
+    char** names;
+};
+
+
+struct Function_Declaration {
+    struct Function_Argument arguments;
+    char* return_type;
+    char* name;
+    int quantity_of_grammars;
+    struct Grammar* body;
+    int quantity_of_variables;
+};
+
+
+struct Function_Calling {
+    char* name;
+    char** arguments;
 };
 
 
