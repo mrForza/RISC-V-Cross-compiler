@@ -72,6 +72,8 @@ char* generate_assembly_for_unknown_grammar(struct Grammar grammar) {
     struct General_Assignment_Expression general_assignment_expression;
     struct Read_Int_Function read_int;
     struct Write_Int_Function write_int;
+    struct Function_Declaration func_decl;
+    struct Function_Calling func_calling;
     char* risc_v_assembly = "";
 
     switch (grammar.type) {
@@ -128,6 +130,10 @@ char* generate_assembly_for_unknown_grammar(struct Grammar grammar) {
         case FOR_STATEMENT:
             break;
         case FUNCTION_DECLARATION:
+            func_decl = *(struct Function_Declaration*)grammar.data;
+            risc_v_assembly = concatenate(
+                    risc_v_assembly,
+                    generate_assembly_for_function_declaration(func_decl));
             break;
         case ASSIGNMENT_EXPRESSION:
             assignment_expression = *(struct Assignment_Expression*)grammar.data;
@@ -153,6 +159,18 @@ char* generate_assembly_for_unknown_grammar(struct Grammar grammar) {
             risc_v_assembly = concatenate(
                     risc_v_assembly,
                     generate_assembly_for_write_int_function(write_int));
+            break;
+        case FUNCTION_CALLING:
+            func_calling = *(struct Function_Calling*)grammar.data;
+            risc_v_assembly = concatenate(
+                    risc_v_assembly,
+                    generate_assembly_for_function_calling(func_calling));
+            break;
+        case READ_CHAR:
+            break;
+        case WRITE_CHAR:
+            break;
+        case UNKNOWN:
             break;
     }
 
@@ -620,7 +638,6 @@ _new_iteration:
 
 char* generate_assembly_for_while_statement(struct While statement) {
     char* risc_v_assembly = "";
-
     risc_v_assembly = concatenate(risc_v_assembly, "\n\twhile_condition:\n\t");
     risc_v_assembly = concatenate(
             risc_v_assembly,
@@ -839,5 +856,96 @@ char* generate_assembly_for_write_int_function(struct Write_Int_Function write_i
     }
 
     risc_v_assembly = concatenate(risc_v_assembly, "\n\tecall");
+    return risc_v_assembly;
+}
+
+
+char* generate_assembly_for_function_declaration(struct Function_Declaration func) {
+    char* risc_v_assembly = concatenate("\n\t", concatenate(func.name, ":"));
+    int i = 0;
+    int quantity_of_arguments = 0;
+
+    // Generate assembly for function arguments
+    while (func.arguments.names[i] != NULL && i < 7) {
+        ++quantity_of_arguments;
+        char* idx_representation = (char*)malloc(sizeof(char));
+        sprintf(idx_representation, "%d", i);
+        risc_v_assembly = concatenate(
+                risc_v_assembly,
+                concatenate("\n\tsw a", idx_representation));
+        risc_v_assembly = concatenate(risc_v_assembly, ", (sp)");
+        struct Variable* var = (struct Variable*)malloc(sizeof(struct Variable));
+        var->alias = func.arguments.names[i];
+        var->value = 0;
+        add_variable_in_stack_context(stack_context, var);
+        ++i;
+        stack_pointer -= 4;
+    }
+
+    // Generate assembly for function scope
+    for (int j = 0; j < func.quantity_of_grammars; ++j) {
+        risc_v_assembly = concatenate(
+                risc_v_assembly,
+                generate_assembly_for_unknown_grammar(func.body[j]));
+    }
+
+
+    // Delete all variables and arguments from stack;
+    for (int j = 0; j < func.quantity_of_variables + quantity_of_arguments; ++j) {
+        risc_v_assembly = concatenate(risc_v_assembly, "\n\tlw t6, (sp)\n\taddi sp, sp, 4");
+        stack_pointer += 4;
+        stack_context->variables[stack_context->size - 1].is_empty = true;
+        stack_context->variables[stack_context->size - 1].alias = "";
+        stack_context->variables[stack_context->size - 1].value = "";
+        --stack_context->size;
+    }
+
+    return risc_v_assembly;
+}
+
+
+char* generate_assembly_for_function_calling(struct Function_Calling func_calling) {
+    char* risc_v_assembly = "";
+    int i = 0;
+
+    while (func_calling.arguments[i] != NULL) {
+        char* idx_representation = (char*)malloc(1 * sizeof(char));
+        if (check_string_is_number(func_calling.arguments[i])) {
+            sprintf(idx_representation, "%d", i);
+            risc_v_assembly = concatenate(
+                    risc_v_assembly,
+                    concatenate("\n\tli a", idx_representation));
+            risc_v_assembly = concatenate(
+                    risc_v_assembly,
+                    concatenate(", ", func_calling.arguments[i]));
+        } else {
+            int index = get_variable_context_shift(*stack_context, func_calling.arguments[i]);
+            if (index  == -1) {
+                printf("SEMANTIC ERROR: No variable %s in current stack scope!",func_calling.arguments[i]);
+                return "";
+            }
+            risc_v_assembly = concatenate(
+                    risc_v_assembly,
+                    concatenate("\n\taddi, sp, sp, ",
+                                convert_int_to_string((stack_context->size - index) * 4)));
+            risc_v_assembly = concatenate(risc_v_assembly, "\n\tlw, t0, (sp)");
+            risc_v_assembly = concatenate(
+                    risc_v_assembly,
+                    concatenate(
+                            "\n\taddi, sp, sp, -",
+                            convert_int_to_string((stack_context->size - index) * 4)));
+            risc_v_assembly = concatenate(
+                    risc_v_assembly,
+                    concatenate("\n\tmv a", idx_representation));
+            risc_v_assembly = concatenate(risc_v_assembly, ", t0");
+        }
+        ++i;
+    }
+
+    risc_v_assembly = concatenate(
+            risc_v_assembly,
+            concatenate("\n\tj ", func_calling.name));
+
+    risc_v_assembly = concatenate(risc_v_assembly, "\n\tmv t0, a0");
     return risc_v_assembly;
 }

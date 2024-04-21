@@ -4,6 +4,7 @@
 struct Variable {
     char* alias;
     char* value;
+    bool is_empty;
 };
 
 
@@ -70,3 +71,9 @@ char* generate_assembly_for_read_int_function(struct Read_Int_Function read_int)
 
 
 char* generate_assembly_for_write_int_function(struct Write_Int_Function write_int);
+
+
+char* generate_assembly_for_function_declaration(struct Function_Declaration func);
+
+
+char* generate_assembly_for_function_calling(struct Function_Calling func_calling);

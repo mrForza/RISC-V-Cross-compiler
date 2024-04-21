@@ -1,8 +1,10 @@
+int get_square(int x) {
+    int a = 1;
+    a = a + 2;
+    int b, c, d;
+}
+
+
 int main() {
-    int n = 5;
-    int result = 1;
-    while (n > 0) {
-        result *= n;
-        n -= 1;
-    }
+    get_square(3);
 }
