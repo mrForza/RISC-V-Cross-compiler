@@ -14,6 +14,8 @@ bool is_initial_generation = true;
 
 int assignment_counter = 0;
 
+int global_float_val_counter = 0;
+
 
 char* convert_int_to_string(int number) {
     int temp = number;
@@ -27,6 +29,17 @@ char* convert_int_to_string(int number) {
     char* string = (char*)malloc(quantity_of_bits * sizeof(char));
     sprintf(string, "%d", number);
     return string;
+}
+
+
+bool is_float_number(const char* representation, int size) {
+    for (int i = 0; i < size; ++i) {
+        if (representation[i] == '.') {
+            return true;
+        }
+    }
+
+    return false;
 }
 
 
@@ -68,12 +81,13 @@ char* generate_assembly_for_unknown_grammar(struct Grammar grammar) {
     struct If_Else if_else_statement;
     struct Do_While do_while_statement;
     struct While while_statement;
+    struct For for_statement;
     struct Assignment_Expression assignment_expression;
     struct General_Assignment_Expression general_assignment_expression;
     struct Read_Int_Function read_int;
     struct Write_Int_Function write_int;
-    struct Function_Declaration func_decl;
-    struct Function_Calling func_calling;
+    struct Read_Float_Function read_float;
+    struct Write_Float_Function write_float;
     char* risc_v_assembly = "";
 
     switch (grammar.type) {
@@ -97,9 +111,10 @@ char* generate_assembly_for_unknown_grammar(struct Grammar grammar) {
             break;
         case ARITHMETIC_EXPRESSION:
             arithmetic_expression = *(struct Arithmetic_Expression*)grammar.data;
+            bool is_float_expr;
             risc_v_assembly = concatenate(
                     risc_v_assembly,
-                    generate_assembly_for_arithmetic_expression(arithmetic_expression));
+                    generate_assembly_for_arithmetic_expression(arithmetic_expression, &is_float_expr));
             break;
         case LOGIC_EXPRESSION:
             break;
@@ -128,12 +143,12 @@ char* generate_assembly_for_unknown_grammar(struct Grammar grammar) {
                     generate_assembly_for_while_statement(while_statement));
             break;
         case FOR_STATEMENT:
-            break;
-        case FUNCTION_DECLARATION:
-            func_decl = *(struct Function_Declaration*)grammar.data;
+            for_statement = *(struct For*)grammar.data;
             risc_v_assembly = concatenate(
                     risc_v_assembly,
-                    generate_assembly_for_function_declaration(func_decl));
+                    generate_assembly_for_for_statement(for_statement));
+            break;
+        case FUNCTION_DECLARATION:
             break;
         case ASSIGNMENT_EXPRESSION:
             assignment_expression = *(struct Assignment_Expression*)grammar.data;
@@ -160,17 +175,17 @@ char* generate_assembly_for_unknown_grammar(struct Grammar grammar) {
                     risc_v_assembly,
                     generate_assembly_for_write_int_function(write_int));
             break;
-        case FUNCTION_CALLING:
-            func_calling = *(struct Function_Calling*)grammar.data;
+        case READ_FLOAT:
+            read_float = *(struct Read_Float_Function*)grammar.data;
             risc_v_assembly = concatenate(
                     risc_v_assembly,
-                    generate_assembly_for_function_calling(func_calling));
+                    generate_assembly_for_read_float_function(read_float));
             break;
-        case READ_CHAR:
-            break;
-        case WRITE_CHAR:
-            break;
-        case UNKNOWN:
+        case WRITE_FLOAT:
+            write_float = *(struct Write_Float_Function*)grammar.data;
+            risc_v_assembly = concatenate(
+                    risc_v_assembly,
+                    generate_assembly_for_write_float_function(write_float));
             break;
     }
 
@@ -214,6 +229,7 @@ char* create_variable_alias(char* varname, int shift) {
 
 
 char* generate_assembly_for_var_declaration(struct Single_Declaration single_declaration) {
+    struct Variable* variable = (struct Variable*)malloc(sizeof(struct Variable));
     char* type = single_declaration.type;
     char* var_name = single_declaration.var_name;
     char* risc_v_assembly = create_variable_alias(var_name, base_stack_pointer - stack_pointer);
@@ -223,16 +239,16 @@ char* generate_assembly_for_var_declaration(struct Single_Declaration single_dec
                 risc_v_assembly,
                 "\n\taddi sp, sp, -4\n\tli ft0 0\n\tflw ft0 (t0)\n\tsw ft0 (sp)\n\0"
         );
+        variable->type = "float";
     } else {
         risc_v_assembly = concatenate(
                 risc_v_assembly,
                 "\n\tli t0 0\n\tsw t0 (sp)\n\taddi sp, sp, -4\n\0"
         );
+        variable->type = "int";
     }
 
-    struct Variable* variable = (struct Variable*)malloc(sizeof(struct Variable));
     variable->alias = var_name;
-    variable->value = "0";
     add_variable_in_stack_context(stack_context, variable);
 
     stack_pointer -= 4;
@@ -259,12 +275,12 @@ char* generate_assembly_for_variables_declarations(struct Complex_Declaration co
 }
 
 
-char* generate_assembly_for_arithmetic_expression(struct Arithmetic_Expression expression) {
+char* generate_assembly_for_arithmetic_expression(struct Arithmetic_Expression expression, bool* is_float) {
     char* risc_v_assembly = "";
 
     if (expression.is_left_expr) {
         risc_v_assembly = concatenate(risc_v_assembly, generate_assembly_for_arithmetic_expression(
-                *((struct Arithmetic_Expression*)(expression.left_operand))));
+                *((struct Arithmetic_Expression*)(expression.left_operand)), is_float));
     } else {
         if (check_string_is_number(expression.left_operand)) {
             risc_v_assembly = concatenate(risc_v_assembly,
@@ -291,7 +307,7 @@ char* generate_assembly_for_arithmetic_expression(struct Arithmetic_Expression e
 
     if (expression.is_right_expr) {
         risc_v_assembly = concatenate(risc_v_assembly, generate_assembly_for_arithmetic_expression(
-                *((struct Arithmetic_Expression*)(expression.right_operand))));
+                *((struct Arithmetic_Expression*)(expression.right_operand)), is_float));
         risc_v_assembly = concatenate(risc_v_assembly,
                                       "addi, sp, sp, 4\n\tlw t1, (sp)\n\tsw, t6, (sp)\n\t");
         risc_v_assembly = concatenate(risc_v_assembly,
@@ -348,62 +364,149 @@ char* generate_assembly_for_arithmetic_expression(struct Arithmetic_Expression e
 
 
 char* generate_assembly_for_var_definition(struct Single_Definition definition_expression) {
+    struct Variable* var = (struct Variable*)malloc(sizeof(struct Variable));
     char* type = definition_expression.type;
     char* var_name = definition_expression.var_name;
-    char* value;
+    char* value = "0";
+    bool is_expr = false;
+    bool is_float = false;
 
     char* risc_v_assembly = create_variable_alias(var_name, base_stack_pointer - stack_pointer);
     risc_v_assembly = concatenate(risc_v_assembly, ":\n\t");
 
-    if (strcmp(type, "float") == 0) {
-        // Assembly for float
+    if (definition_expression.is_expression) {
+        risc_v_assembly = concatenate(
+                risc_v_assembly,
+                generate_assembly_for_arithmetic_expression(
+                        *(struct Arithmetic_Expression*)definition_expression.expression, &is_float));
+        is_expr = true;
+        goto _save_val_to_stack;
     } else {
-        if (definition_expression.is_expression) {
+        value = (char*)definition_expression.expression;
+        if (definition_expression.is_variable) {
+            int index = get_variable_context_shift(*stack_context, value);
+            if (index  == -1) {
+                printf("SEMANTIC ERROR: No variable %s in current stack scope!", value);
+                return "";
+            }
             risc_v_assembly = concatenate(
                     risc_v_assembly,
-                    generate_assembly_for_arithmetic_expression(
-                            *(struct Arithmetic_Expression*)definition_expression.expression));
-        } else {
-            value = (char*)definition_expression.expression;
-            if (definition_expression.is_variable) {
-                int index = get_variable_context_shift(*stack_context, value);
-                if (index  == -1) {
-                    printf("SEMANTIC ERROR: No variable %s in current stack scope!", value);
-                    return "";
-                }
-                risc_v_assembly = concatenate(
-                        risc_v_assembly,
-                        concatenate("\n\taddi, sp, sp, ",
-                                    convert_int_to_string((stack_context->size - index) * 4)));
-                risc_v_assembly = concatenate(risc_v_assembly, "\n\tlw, t0, (sp)");
-                risc_v_assembly = concatenate(
-                        risc_v_assembly,
-                        concatenate(
-                                "\n\taddi, sp, sp, -",
+                    concatenate("\n\taddi, sp, sp, ",
                                 convert_int_to_string((stack_context->size - index) * 4)));
-                risc_v_assembly = concatenate(risc_v_assembly, "\n\tsw, t0, (sp)");
-            } else {
-                risc_v_assembly = concatenate(risc_v_assembly, "\n\tli t0, ");
-                risc_v_assembly = concatenate(risc_v_assembly, value);
+            risc_v_assembly = concatenate(risc_v_assembly, "\n\tlw, t0, (sp)");
+            risc_v_assembly = concatenate(
+                    risc_v_assembly,
+                    concatenate(
+                            "\n\taddi, sp, sp, -",
+                            convert_int_to_string((stack_context->size - index) * 4)));
+            risc_v_assembly = concatenate(risc_v_assembly, "\n\tsw, t0, (sp)");
+        } else {
+            risc_v_assembly = concatenate(risc_v_assembly, "\n\tli t0, ");
+            risc_v_assembly = concatenate(risc_v_assembly, value);
 
-                if (strcmp(type, "char") == 0 || strcmp(type, "short") == 0) {
-                    risc_v_assembly = concatenate(risc_v_assembly,"\n\tsb t0 (sp)\n\0");
-                } else {
-                    risc_v_assembly = concatenate(risc_v_assembly, "\n\tsw t0 (sp)");
+            _save_val_to_stack:
+            if (strcmp(type, "char") == 0) {
+                if (is_expr) {
+                    risc_v_assembly = concatenate(risc_v_assembly, "\n\taddi, sp, sp, 4\n\tlb t0, (sp)");
                 }
+                risc_v_assembly = concatenate(risc_v_assembly,"\n\tsb t0 (sp)\n\0");
+                var->type = "char";
+            } else if (strcmp(type, "int") == 0) {
+                if (is_expr) {
+                    risc_v_assembly = concatenate(risc_v_assembly, "\n\taddi, sp, sp, 4\n\tlw t0, (sp)");
+                }
+                risc_v_assembly = concatenate(risc_v_assembly, "\n\tsw t0 (sp)");
+                var->type = "int";
+            } else {
+                if (is_expr) {
+                    risc_v_assembly = concatenate(risc_v_assembly, "\n\taddi, sp, sp, 4\n\tflw ft0, (sp)");
+                }
+                risc_v_assembly = concatenate(risc_v_assembly, "\n\tfsw ft0, (sp)");
+                var->type = "float";
             }
-            risc_v_assembly = concatenate(risc_v_assembly, "\n\taddi, sp, sp, -4\n\0");
         }
-
-        struct Variable* var = (struct Variable*)malloc(sizeof(struct Variable));
-        var->alias = var_name;
-        var->value = value;
-        add_variable_in_stack_context(stack_context, var);
     }
 
+    risc_v_assembly = concatenate(risc_v_assembly, "\n\taddi, sp, sp, -4\n\0");
+
+    var->alias = var_name;
+    add_variable_in_stack_context(stack_context, var);
     stack_pointer -= 4;
     return risc_v_assembly;
 }
+
+
+/*char* generate_assembly_for_var_definition(struct Single_Definition definition_expression) {
+    struct Variable* var = (struct Variable*)malloc(sizeof(struct Variable));
+    char* type = definition_expression.type;
+    char* var_name = definition_expression.var_name;
+    char* value = "0";
+    bool is_expr = false;
+    bool is_float = false;
+
+    char* risc_v_assembly = create_variable_alias(var_name, base_stack_pointer - stack_pointer);
+    risc_v_assembly = concatenate(risc_v_assembly, ":\n\t");
+
+    if (definition_expression.is_expression) {
+        risc_v_assembly = concatenate(
+                risc_v_assembly,
+                generate_assembly_for_arithmetic_expression(
+                        *(struct Arithmetic_Expression*)definition_expression.expression, &is_float));
+        is_expr = true;
+        goto _save_val_to_stack;
+    } else {
+        value = (char*)definition_expression.expression;
+        if (definition_expression.is_variable) {
+            int index = get_variable_context_shift(*stack_context, value);
+            if (index  == -1) {
+                printf("SEMANTIC ERROR: No variable %s in current stack scope!", value);
+                return "";
+            }
+            risc_v_assembly = concatenate(
+                    risc_v_assembly,
+                    concatenate("\n\taddi, sp, sp, ",
+                                convert_int_to_string((stack_context->size - index) * 4)));
+            risc_v_assembly = concatenate(risc_v_assembly, "\n\tlw, t0, (sp)");
+            risc_v_assembly = concatenate(
+                    risc_v_assembly,
+                    concatenate(
+                            "\n\taddi, sp, sp, -",
+                            convert_int_to_string((stack_context->size - index) * 4)));
+            risc_v_assembly = concatenate(risc_v_assembly, "\n\tsw, t0, (sp)");
+        } else {
+            risc_v_assembly = concatenate(risc_v_assembly, "\n\tli t0, ");
+            risc_v_assembly = concatenate(risc_v_assembly, value);
+
+            _save_val_to_stack:
+            if (strcmp(type, "char") == 0) {
+                if (is_expr) {
+                    risc_v_assembly = concatenate(risc_v_assembly, "\n\taddi, sp, sp, 4\n\tlb t0, (sp)");
+                }
+                risc_v_assembly = concatenate(risc_v_assembly,"\n\tsb t0 (sp)\n\0");
+                var->type = "char";
+            } else if (strcmp(type, "int") == 0) {
+                if (is_expr) {
+                    risc_v_assembly = concatenate(risc_v_assembly, "\n\taddi, sp, sp, 4\n\tlw t0, (sp)");
+                }
+                risc_v_assembly = concatenate(risc_v_assembly, "\n\tsw t0 (sp)");
+                var->type = "int";
+            } else {
+                if (is_expr) {
+                    risc_v_assembly = concatenate(risc_v_assembly, "\n\taddi, sp, sp, 4\n\tflw ft0, (sp)");
+                }
+                risc_v_assembly = concatenate(risc_v_assembly, "\n\tfsw ft0, (sp)");
+                var->type = "float";
+            }
+        }
+    }
+
+    risc_v_assembly = concatenate(risc_v_assembly, "\n\taddi, sp, sp, -4\n\0");
+
+    var->alias = var_name;
+    add_variable_in_stack_context(stack_context, var);
+    stack_pointer -= 4;
+    return risc_v_assembly;
+}*/
 
 
 /*char* generate_assembly_for_variables_definitions(char* type, char** var_names, char** values, int count) {
@@ -437,11 +540,11 @@ char* generate_assembly_for_logic_expression(struct Logic_Expression expression)
         risc_v_assembly = concatenate(risc_v_assembly, generate_assembly_for_logic_expression(
                 *((struct Logic_Expression*)(expression.right_operand))));
         risc_v_assembly = concatenate(risc_v_assembly,
-                                      "addi, sp, sp, 4\n\tlw t1, (sp)\n\tsw, t6, (sp)\n\t");
+                                      "\n\taddi, sp, sp, 4\n\tlw t1, (sp)\n\tsw, t6, (sp)\n\t");
         risc_v_assembly = concatenate(risc_v_assembly,
-                                      "addi, sp, sp, 4\n\tlw t0, (sp)\n\tsw, t6, (sp)\n\t");
+                                      "\n\taddi, sp, sp, 4\n\tlw t0, (sp)\n\tsw, t6, (sp)\n\t");
     } else {
-        risc_v_assembly = concatenate(risc_v_assembly, "addi, sp, sp, 4\n\tlw t0, (sp)\n\t");
+        risc_v_assembly = concatenate(risc_v_assembly, "\n\taddi, sp, sp, 4\n\tlw t0, (sp)\n\t");
         risc_v_assembly = concatenate(risc_v_assembly, "li t1, ");
         risc_v_assembly = concatenate(risc_v_assembly, (char*)expression.right_operand);
         risc_v_assembly = concatenate(risc_v_assembly, "\n\t");
@@ -465,10 +568,10 @@ char* generate_assembly_for_logic_expression(struct Logic_Expression expression)
 char* generate_assembly_for_relational_expression(struct Relational_Expression expression, char* label,
         char* cancel_label, bool key) {
     char* risc_v_assembly = "RELATION:";
-
+    bool is_float = false;
     if (expression.is_left_expr) {
         risc_v_assembly = concatenate(risc_v_assembly, generate_assembly_for_arithmetic_expression(
-                *((struct Arithmetic_Expression*)(expression.left_operand))));
+                *((struct Arithmetic_Expression*)(expression.left_operand)), &is_float));
         risc_v_assembly = concatenate(risc_v_assembly,
                                       "\n\taddi, sp, sp, 4\n\tlw t0, (sp)\n\tsw, t6, (sp)");
     } else {
@@ -497,11 +600,11 @@ char* generate_assembly_for_relational_expression(struct Relational_Expression e
 
     if (expression.is_right_expr) {
         risc_v_assembly = concatenate(risc_v_assembly, generate_assembly_for_arithmetic_expression(
-                *((struct Arithmetic_Expression*)(expression.right_operand))));
+                *((struct Arithmetic_Expression*)(expression.right_operand)), &is_float));
         risc_v_assembly = concatenate(risc_v_assembly,
-                                      "addi, sp, sp, 4\n\tlw t1, (sp)\n\tsw, t6, (sp)\n\t");
+                                      "\n\taddi, sp, sp, 4\n\tlw t1, (sp)\n\tsw, t6, (sp)\n\t");
         risc_v_assembly = concatenate(risc_v_assembly,
-                                      "addi, sp, sp, 4\n\tlw t0, (sp)\n\tsw, t6, (sp)\n\t");
+                                      "\n\taddi, sp, sp, 4\n\tlw t0, (sp)\n\tsw, t6, (sp)\n\t");
     } else {
         if (check_string_is_number(expression.right_operand)) {
             risc_v_assembly = concatenate(risc_v_assembly, "\n\tli t1, ");
@@ -585,6 +688,23 @@ _operators:
 }
 
 
+char* generate_assembly_for_erasing_stack(int quantity) {
+    char* risc_v_assembly = "\n\tli t6, 0";
+
+    for (int i = 0; i < quantity; ++i) {
+        risc_v_assembly = concatenate(risc_v_assembly, "\n\tsw t6, (sp)");
+        risc_v_assembly = concatenate(risc_v_assembly, "\n\taddi, sp, sp, 4");
+        struct Variable var;
+        var.type = "undefined";
+        var.alias = "undefined";
+        stack_context->variables[stack_context->size - i] = var;
+        stack_pointer += 4;
+    }
+
+    return risc_v_assembly;
+}
+
+
 char* generate_assembly_for_if_else_statement(struct If_Else statement) {
     char* risc_v_assembly = "";
     char* risc_v_assembly_for_bodies = "";
@@ -638,7 +758,8 @@ _new_iteration:
 
 char* generate_assembly_for_while_statement(struct While statement) {
     char* risc_v_assembly = "";
-    risc_v_assembly = concatenate(risc_v_assembly, "\n\twhile_condition:\n\t");
+
+    risc_v_assembly = concatenate(risc_v_assembly, "\nwhile_condition:\n\t");
     risc_v_assembly = concatenate(
             risc_v_assembly,
             generate_assembly_for_relational_expression(
@@ -646,20 +767,35 @@ char* generate_assembly_for_while_statement(struct While statement) {
                     "while_body", "while_end",  false));
 
 _new_iteration:
-    risc_v_assembly = concatenate(risc_v_assembly, "\n\twhile_body:\n\t");
+    risc_v_assembly = concatenate(risc_v_assembly, "\nwhile_body:\n\t");
     for (int i = 0; i < statement.grammars_quantity; ++i) {
         risc_v_assembly = concatenate(risc_v_assembly,
                                       generate_assembly_for_unknown_grammar(statement.body[i]));
     }
     risc_v_assembly = concatenate(risc_v_assembly, "\n\tj while_condition");
-    risc_v_assembly = concatenate(risc_v_assembly, "\n\twhile_end:");
+    risc_v_assembly = concatenate(risc_v_assembly, "\nwhile_end:");
     return risc_v_assembly;
 }
 
 
 char* generate_assembly_for_for_statement(struct For statement) {
     char* risc_v_assembly = "";
+    bool key = false;
+    risc_v_assembly = concatenate(risc_v_assembly,
+                                  generate_assembly_for_var_definition(statement.definition));
+    risc_v_assembly = concatenate(risc_v_assembly, "\nfor_condition:\n\t");
+    risc_v_assembly = concatenate(risc_v_assembly,
+                                  generate_assembly_for_relational_expression(
+                                          statement.relation, "", "", key));
+    risc_v_assembly = concatenate(risc_v_assembly, "\nfor_body:\n\t");
+    for (int i = 0; i < statement.quantity; ++i) {
+        risc_v_assembly = concatenate(risc_v_assembly,
+                                      generate_assembly_for_unknown_grammar(statement.body[i]));
 
+    }
+    risc_v_assembly = concatenate(risc_v_assembly, generate_assembly_for_general_assignment_expression(statement.expr));
+    risc_v_assembly = concatenate(risc_v_assembly, "\n\tj for_condition");
+    risc_v_assembly = concatenate(risc_v_assembly, "\nfor_end:");
     return risc_v_assembly;
 }
 
@@ -669,6 +805,7 @@ char* generate_assembly_for_assignment_expression(struct Assignment_Expression e
     sprintf(representation, "%d", assignment_counter++);
     char* risc_v_assembly = concatenate("ASSIGNMENT_", representation);
     risc_v_assembly = concatenate(risc_v_assembly, ":\n\t");
+    bool is_float = false; //!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
     int index = get_variable_context_shift(*stack_context, (char*)expression.var_name);
     if (index  == -1) {
@@ -688,7 +825,7 @@ char* generate_assembly_for_assignment_expression(struct Assignment_Expression e
 
     if (expression.is_value_expression) {
         risc_v_assembly = concatenate(risc_v_assembly, generate_assembly_for_arithmetic_expression(
-                *((struct Arithmetic_Expression*)(expression.value))));
+                *((struct Arithmetic_Expression*)(expression.value)), &is_float));
     } else {
         if (expression.is_variable) {
             index = get_variable_context_shift(*stack_context, (char*)expression.value);
@@ -715,21 +852,21 @@ char* generate_assembly_for_assignment_expression(struct Assignment_Expression e
     }
 
     int value = strtol(expression.value, NULL, 10);
-    int left = strtol(stack_context->variables[index].value, NULL, 10);
+    //int left = strtol(stack_context->variables[index].value, NULL, 10);
 _operators:
 
     if (strcmp(expression.sign, "+=") == 0) {
         risc_v_assembly = concatenate(risc_v_assembly, "\n\tadd t0, t0, t1");
-        sprintf(stack_context->variables[index].value, "%d", left + value);
+        // sprintf(stack_context->variables[index].value, "%d", left + value);
     } else if (strcmp(expression.sign, "-=") == 0) {
         risc_v_assembly = concatenate(risc_v_assembly, "\n\tsub t0, t0, t1");
-        sprintf(stack_context->variables[index].value, "%d", left - value);
+        // sprintf(stack_context->variables[index].value, "%d", left - value);
     } else if (strcmp(expression.sign, "*=") == 0) {
         risc_v_assembly = concatenate(risc_v_assembly, "\n\tmul t0, t0, t1");
-        sprintf(stack_context->variables[index].value, "%d", left * value);
+        // sprintf(stack_context->variables[index].value, "%d", left * value);
     } else if (strcmp(expression.sign, "/=") == 0) {
         risc_v_assembly = concatenate(risc_v_assembly, "\n\tdiv t0, t0, t1");
-        sprintf(stack_context->variables[index].value, "%d", left / value);
+        // sprintf(stack_context->variables[index].value, "%d", left / value);
     }
 
     int current_stack_pointer = base_stack_pointer - (4 * index);
@@ -752,12 +889,13 @@ char* generate_assembly_for_general_assignment_expression(struct General_Assignm
     char* var_name = expression.var_name;
     char* value = "0";
     int index;
+    bool is_float = false; // !!!!!!!!!!!!!!!!!!!!!!!!!!1
 
     if (expression.is_value_expression) {
         risc_v_assembly = concatenate(
                 risc_v_assembly,
                 generate_assembly_for_arithmetic_expression(
-                        *(struct Arithmetic_Expression*)expression.value));
+                        *(struct Arithmetic_Expression*)expression.value, &is_float));
         risc_v_assembly = concatenate(risc_v_assembly,
                                       "\n\taddi, sp, sp, 4\n\tlw t0, (sp)\n\tsw, t6, (sp)");
     } else {
@@ -772,6 +910,7 @@ char* generate_assembly_for_general_assignment_expression(struct General_Assignm
                     risc_v_assembly,
                     concatenate("\n\taddi, sp, sp, ",
                                 convert_int_to_string((stack_context->size - index) * 4)));
+
             risc_v_assembly = concatenate(risc_v_assembly, "\n\tlw, t0, (sp)");
             risc_v_assembly = concatenate(
                     risc_v_assembly,
@@ -793,6 +932,7 @@ char* generate_assembly_for_general_assignment_expression(struct General_Assignm
             risc_v_assembly,
             concatenate("\n\taddi, sp, sp, ",
                         convert_int_to_string((stack_context->size - index) * 4)));
+
     risc_v_assembly = concatenate(risc_v_assembly, "\n\tsw, t0, (sp)");
     risc_v_assembly = concatenate(
             risc_v_assembly,
@@ -860,92 +1000,74 @@ char* generate_assembly_for_write_int_function(struct Write_Int_Function write_i
 }
 
 
-char* generate_assembly_for_function_declaration(struct Function_Declaration func) {
-    char* risc_v_assembly = concatenate("\n\t", concatenate(func.name, ":"));
-    int i = 0;
-    int quantity_of_arguments = 0;
+char* generate_assembly_for_read_float_function(struct Read_Float_Function read_float) {
+    char* risc_v_assembly = "\n\tli a7, 6";
+    risc_v_assembly = concatenate(risc_v_assembly, "\n\tecall");
 
-    // Generate assembly for function arguments
-    while (func.arguments.names[i] != NULL && i < 7) {
-        ++quantity_of_arguments;
-        char* idx_representation = (char*)malloc(sizeof(char));
-        sprintf(idx_representation, "%d", i);
-        risc_v_assembly = concatenate(
-                risc_v_assembly,
-                concatenate("\n\tsw a", idx_representation));
-        risc_v_assembly = concatenate(risc_v_assembly, ", (sp)");
-        struct Variable* var = (struct Variable*)malloc(sizeof(struct Variable));
-        var->alias = func.arguments.names[i];
-        var->value = 0;
-        add_variable_in_stack_context(stack_context, var);
-        ++i;
-        stack_pointer -= 4;
+    int index = get_variable_context_shift(*stack_context, read_float.var_name);
+    if (index  == -1) {
+        printf("SEMANTIC ERROR: No variable %s in current stack scope!", read_float.var_name);
+        return "";
     }
-
-    // Generate assembly for function scope
-    for (int j = 0; j < func.quantity_of_grammars; ++j) {
-        risc_v_assembly = concatenate(
-                risc_v_assembly,
-                generate_assembly_for_unknown_grammar(func.body[j]));
-    }
-
-
-    // Delete all variables and arguments from stack;
-    for (int j = 0; j < func.quantity_of_variables + quantity_of_arguments; ++j) {
-        risc_v_assembly = concatenate(risc_v_assembly, "\n\tlw t6, (sp)\n\taddi sp, sp, 4");
-        stack_pointer += 4;
-        stack_context->variables[stack_context->size - 1].is_empty = true;
-        stack_context->variables[stack_context->size - 1].alias = "";
-        stack_context->variables[stack_context->size - 1].value = "";
-        --stack_context->size;
-    }
-
+    risc_v_assembly = concatenate(risc_v_assembly, "\n\tfmv.s ft0, fa0");
+    risc_v_assembly = concatenate(
+            risc_v_assembly,
+            concatenate("\n\taddi, sp, sp, ",
+                        convert_int_to_string((stack_context->size - index) * 4)));
+    risc_v_assembly = concatenate(risc_v_assembly, "\n\tfsw, ft0, (sp)");
+    risc_v_assembly = concatenate(
+            risc_v_assembly,
+            concatenate(
+                    "\n\taddi, sp, sp, -",
+                    convert_int_to_string((stack_context->size - index) * 4)));
+    risc_v_assembly = concatenate(risc_v_assembly, "\n");
     return risc_v_assembly;
 }
 
 
-char* generate_assembly_for_function_calling(struct Function_Calling func_calling) {
-    char* risc_v_assembly = "";
-    int i = 0;
-
-    while (func_calling.arguments[i] != NULL) {
-        char* idx_representation = (char*)malloc(1 * sizeof(char));
-        if (check_string_is_number(func_calling.arguments[i])) {
-            sprintf(idx_representation, "%d", i);
-            risc_v_assembly = concatenate(
-                    risc_v_assembly,
-                    concatenate("\n\tli a", idx_representation));
-            risc_v_assembly = concatenate(
-                    risc_v_assembly,
-                    concatenate(", ", func_calling.arguments[i]));
-        } else {
-            int index = get_variable_context_shift(*stack_context, func_calling.arguments[i]);
-            if (index  == -1) {
-                printf("SEMANTIC ERROR: No variable %s in current stack scope!",func_calling.arguments[i]);
-                return "";
-            }
-            risc_v_assembly = concatenate(
-                    risc_v_assembly,
-                    concatenate("\n\taddi, sp, sp, ",
-                                convert_int_to_string((stack_context->size - index) * 4)));
-            risc_v_assembly = concatenate(risc_v_assembly, "\n\tlw, t0, (sp)");
-            risc_v_assembly = concatenate(
-                    risc_v_assembly,
-                    concatenate(
-                            "\n\taddi, sp, sp, -",
-                            convert_int_to_string((stack_context->size - index) * 4)));
-            risc_v_assembly = concatenate(
-                    risc_v_assembly,
-                    concatenate("\n\tmv a", idx_representation));
-            risc_v_assembly = concatenate(risc_v_assembly, ", t0");
+char* generate_assembly_for_write_float_function(struct Write_Float_Function write_float) {
+    char* risc_v_assembly = "\n\tli a7, 2";
+    if (write_float.is_var) {
+        int index = get_variable_context_shift(*stack_context, write_float.value);
+        if (index  == -1) {
+            printf("SEMANTIC ERROR: No variable %s in current stack scope!", write_float.value);
+            return "";
         }
-        ++i;
+        risc_v_assembly = concatenate(
+                risc_v_assembly,
+                concatenate("\n\taddi, sp, sp, ",
+                            convert_int_to_string((stack_context->size - index) * 4)));
+        risc_v_assembly = concatenate(risc_v_assembly, "\n\tfsw, ft0, (sp)");
+        risc_v_assembly = concatenate(
+                risc_v_assembly,
+                concatenate(
+                        "\n\taddi, sp, sp, -",
+                        convert_int_to_string((stack_context->size - index) * 4)));
+        risc_v_assembly = concatenate(risc_v_assembly, "\n");
+        risc_v_assembly = concatenate(risc_v_assembly, "\n\tfmv.s fa0, ft0");
+    } else {
+        risc_v_assembly = concatenate(risc_v_assembly, "\n.data:");
+        risc_v_assembly = concatenate(
+                risc_v_assembly,
+                concatenate("\n\t", concatenate(
+                        "float_temp_val_",
+                        convert_int_to_string(global_float_val_counter))));
+        risc_v_assembly = concatenate(
+                risc_v_assembly,
+                concatenate(": .float ", write_float.value));
+        risc_v_assembly = concatenate(risc_v_assembly, "\n");
+        risc_v_assembly = concatenate(risc_v_assembly, ".text");
+        risc_v_assembly = concatenate(
+                risc_v_assembly,
+                concatenate("\n\tli a7, 2\n\tflw ft0, ",
+                            concatenate("float_temp_val_", convert_int_to_string(global_float_val_counter))));
+        risc_v_assembly = concatenate(risc_v_assembly, ", t0");
+        global_float_val_counter++;
+        risc_v_assembly = concatenate(risc_v_assembly, "\n\tfmv.s fa0, ft0");
+        risc_v_assembly = concatenate(risc_v_assembly, "\n\tecall");
+        return risc_v_assembly;
     }
 
-    risc_v_assembly = concatenate(
-            risc_v_assembly,
-            concatenate("\n\tj ", func_calling.name));
-
-    risc_v_assembly = concatenate(risc_v_assembly, "\n\tmv t0, a0");
+    risc_v_assembly = concatenate(risc_v_assembly, "\n\tecall");
     return risc_v_assembly;
 }
