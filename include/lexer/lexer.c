@@ -327,7 +327,7 @@ struct Token* get_do_keyword(char* content, unsigned long long position) {
 }
 
 
-struct Token* get_double_keyword(char* content, unsigned long long position) {
+/*struct Token* get_double_keyword(char* content, unsigned long long position) {
     unsigned long long start_position = position;
     char* substring = get_substring(content, position, position + 5);
     char* keyword = "double";
@@ -350,7 +350,7 @@ struct Token* get_double_keyword(char* content, unsigned long long position) {
     }
 
     return get_identifier_token(content, start_position);
-}
+}*/
 
 
 struct Token* get_default_keyword(char* content, unsigned long long position) {
@@ -388,10 +388,10 @@ struct Token* get_d_start_keyword_token(char* content, unsigned long long positi
         return token;
     }
 
-    token = get_double_keyword(content, start_position);
+    /*token = get_double_keyword(content, start_position);
     if (token->type != INCORRECT) {
         return token;
-    }
+    }*/
 
     token = get_default_keyword(content, start_position);
     if (token->type != INCORRECT) {
@@ -418,6 +418,11 @@ struct Token* get_e_start_keyword_token(char* content, unsigned long long positi
 struct Token* get_f_start_keyword_token(char* content, unsigned long long position) {
     struct Token* token;
     unsigned long long start_position = position;
+
+    token = get_current_keyword(content, start_position, "float", FLOAT);
+    if (token->type != INCORRECT) {
+        return token;
+    }
 
     token = get_current_keyword(content, start_position, "for", FOR);
     if (token->type != INCORRECT) {

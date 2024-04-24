@@ -3,8 +3,7 @@
 
 struct Variable {
     char* alias;
-    char* value;
-    bool is_empty;
+    char* type;
 };
 
 
@@ -39,7 +38,7 @@ char* generate_assembly_for_variables_definitions(char* type, char** var_names, 
 char* create_variable_alias(char* varname, int shift);
 
 
-char* generate_assembly_for_arithmetic_expression(struct Arithmetic_Expression expression);
+char* generate_assembly_for_arithmetic_expression(struct Arithmetic_Expression expression, bool* is_float);
 
 
 char* generate_assembly_for_logic_expression(struct Logic_Expression expression);
@@ -73,7 +72,7 @@ char* generate_assembly_for_read_int_function(struct Read_Int_Function read_int)
 char* generate_assembly_for_write_int_function(struct Write_Int_Function write_int);
 
 
-char* generate_assembly_for_function_declaration(struct Function_Declaration func);
+char* generate_assembly_for_read_float_function(struct Read_Float_Function read_float);
 
 
-char* generate_assembly_for_function_calling(struct Function_Calling func_calling);
+char* generate_assembly_for_write_float_function(struct Write_Float_Function write_float);

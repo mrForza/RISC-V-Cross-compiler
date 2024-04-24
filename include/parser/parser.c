@@ -135,32 +135,6 @@ int get_last_syntax_position(void** tokens, int start, int end, int* is_error) {
         }
         i = curly_bracket_index;
         return i;
-    } else if (((struct Token*)(tokens[i]))->type == CHAR ||
-            ((struct Token*)(tokens[i]))->type == INT ||
-            ((struct Token*)(tokens[i]))->type == DOUBLE) {
-        if (((struct Token*)(tokens[i + 2]))->type == LEFT_ROUND_BRACKET) {
-            int closed_bracket = find_close_bracket_2(tokens, i, end);
-            if (closed_bracket == -1) {
-                printf("SYNTAX ERROR: Missing round bracket");
-                *is_error = 1;
-                return -1;
-            }
-            i = closed_bracket + 1;
-            int closed_curly_bracket = find_close_curly_bracket(tokens, i, end);
-            if (closed_curly_bracket == -1) {
-                printf("SYNTAX ERROR: Missing curly bracket");
-                *is_error = 1;
-                return -1;
-            }
-            i = closed_curly_bracket;
-            return i;
-        } else {
-            return find_semicolon_position(tokens, i, end);
-        }
-    }
-
-    if (i >= end - 1) {
-        return 0;
     }
 
     printf("SEMANTIC ERROR: Cannot parse syntax construction");
@@ -308,12 +282,19 @@ struct Grammar* get_intermediate_representation_for_scope(
                 grammar.data = write_int;
                 grammar.type = WRITE_INT;
                 grammars[grammars_index++] = grammar;
-            } else if (is_function_calling(tokens, &i, semicolon_position - 1, is_error)) {
-                struct Function_Calling* func_calling =
-                        (struct Function_Calling*)malloc(sizeof(struct Function_Calling));
-                *func_calling = get_function_calling(tokens, i, semicolon_position - 1, is_error);
-                grammar.data = func_calling;
-                grammar.type = FUNCTION_CALLING;
+            } else if (is_read_float(tokens, &i, semicolon_position - 1, is_error)) {
+                struct Read_Float_Function* read_float
+                        = (struct Read_Float_Function*)malloc(sizeof(struct Read_Float_Function));
+                *read_float = get_read_float(tokens, i, semicolon_position - 1, is_error);
+                grammar.data = read_float;
+                grammar.type = READ_FLOAT;
+                grammars[grammars_index++] = grammar;
+            } else if (is_write_float(tokens, &i, semicolon_position - 1, is_error)) {
+                struct Write_Float_Function* write_float
+                        = (struct Write_Float_Function*)malloc(sizeof(struct Write_Float_Function));
+                *write_float = get_write_float(tokens, i, semicolon_position - 1, is_error);
+                grammar.data = write_float;
+                grammar.type = WRITE_FLOAT;
                 grammars[grammars_index++] = grammar;
             } else {
                 struct Unknown* unknown_grammar = (struct Unknown*)malloc(sizeof(struct Unknown));
@@ -334,27 +315,6 @@ struct Grammar* start_parsing(struct Parser* parser, int* quantity_of_grammars, 
     void** tokens = parser->tokens->data;
     struct Grammar* grammars = malloc(128 * sizeof(void*));
 
-    int main_index = 0;
-    int i = 0;
-    int end_index = 0;
-_check_function:
-    end_index = get_last_syntax_position(tokens, i, parser->tokens->size, is_error);
-    if (is_function_declaration(tokens, &i, end_index, is_error)) {
-        int quantity_of_grammars_in_function = 0;
-        struct Function_Declaration* func_decl =
-                (struct Function_Declaration*)malloc(sizeof(struct Function_Declaration));
-        *func_decl = get_function_declaration(tokens, i, end_index, is_error);
-        grammars[main_index].data = func_decl;
-        grammars[main_index].type = FUNCTION_DECLARATION;
-        ++main_index;
-        i = end_index + 1;
-        ++(*quantity_of_grammars);
-        goto _check_function;
-    }
-
-    return grammars;
-    /*
-    // Check main function
     if (check_main(tokens, parser->tokens->size) == true) {
         int index = 5;
         grammars = get_intermediate_representation_for_scope(
@@ -364,7 +324,9 @@ _check_function:
         }
     } else {
         printf("SEMANTIC ERROR: No main function in your file!");
-    }*/
+    }
+
+    return grammars;
 }
 
 
@@ -845,120 +807,25 @@ struct Write_Int_Function get_write_int(void** tokens, int start, int end, int* 
 }
 
 
-struct Function_Declaration get_function_declaration(void** tokens, int start, int end, int* is_error) {
-    struct Function_Declaration function_declaration;
-    int i = start;
-    function_declaration.return_type = ((struct Token*)(tokens[i]))->attributes->text;
-    ++i;
-    function_declaration.name = ((struct Token*)(tokens[i]))->attributes->text;
-    ++i;
-    int closed_bracket = find_close_bracket_2(tokens, i, end);
-    ++i;
-    int quantity_of_arguments = 0;
-    int temp = i;
-_get_arguments:
-    if (((struct Token*)(tokens[i]))->type == CHAR ||
-        ((struct Token*)(tokens[i]))->type == INT ||
-        ((struct Token*)(tokens[i]))->type == DOUBLE) {
-        ++i;
-        if (((struct Token*)(tokens[i]))->type == IDENTIFIER) {
-            ++i;
-            if (((struct Token*)(tokens[i]))->type == COMMA) {
-                ++quantity_of_arguments;
-                goto _get_arguments;
-            } else if (((struct Token*)(tokens[i]))->type == RIGHT_ROUND_BRACKET) {
-                ++quantity_of_arguments;
-            }
-        }
-    }
+struct Read_Float_Function get_read_float(void** tokens, int start, int end, int* is_error) {
+    int i = start + 2;
+    struct Read_Float_Function read_float;
 
-    char** types = (char**)malloc(quantity_of_arguments * sizeof(char*));
-    char** names = (char**)malloc(quantity_of_arguments * sizeof(char*));
-    int j = 0;
-    i = temp;
-
-_create_arguments_representation:
-    if (((struct Token*)(tokens[i]))->type == CHAR ||
-        ((struct Token*)(tokens[i]))->type == INT ||
-        ((struct Token*)(tokens[i]))->type == DOUBLE) {
-        switch (((struct Token*)(tokens[i]))->type) {
-            case CHAR:
-                types[j] = "char";
-                break;
-            case INT:
-                types[j] = "int";
-                break;
-            case DOUBLE:
-                types[j] = "double";
-                break;
-        }
-        ++i;
-        if (((struct Token*)(tokens[i]))->type == IDENTIFIER) {
-            names[j] = ((struct Token*)(tokens[i]))->attributes->text;
-            ++i;
-            if (((struct Token*)(tokens[i]))->type == COMMA) {
-                ++quantity_of_arguments;
-                goto _create_arguments_representation;
-            } else if (((struct Token*)(tokens[i]))->type == RIGHT_ROUND_BRACKET) {
-                ++quantity_of_arguments;
-            }
-        }
-    }
-
-_check_body:
-    i = closed_bracket + 1;
-    int closed_curly_bracket = find_close_curly_bracket(tokens, i, end);
-    int quantity_of_grammars = 0;
-    struct Grammar* grammars;
-    if (((struct Token*)(tokens[closed_curly_bracket]))->type == RIGHT_CURLY_BRACKET &&
-        ((struct Token*)(tokens[closed_curly_bracket - 1]))->type == LEFT_CURLY_BRACKET) {
-        grammars = NULL;
-    } else {
-        grammars = get_intermediate_representation_for_scope(
-                        tokens, i + 1, closed_curly_bracket - 1, &quantity_of_grammars, is_error);
-    }
-
-    function_declaration.body = grammars;
-    function_declaration.arguments.types = types;
-    function_declaration.arguments.names = names;
-    function_declaration.quantity_of_grammars = quantity_of_grammars;
-    function_declaration.quantity_of_variables = get_quantity_of_variables(grammars, quantity_of_grammars);
-
-    return function_declaration;
+    read_float.var_name = ((struct Token*)(tokens[i]))->attributes->text;
+    return read_float;
 }
 
 
-struct Function_Calling get_function_calling(void** tokens, int start, int end, int* is_error) {
-    int i = start;
-    struct Function_Calling func_calling;
-    func_calling.name = ((struct Token*)tokens[i])->attributes->text;
-    ++i;
-    int closed_bracket = find_close_bracket_2(tokens, i, end + 1);
-    ++i;
-    int quantity_of_arguments = 0;
-    int temp = i;
-    while (i < closed_bracket) {
-        if (((struct Token*)(tokens[i]))->type == IDENTIFIER ||
-            ((struct Token*)(tokens[i]))->type == CHAR_LITERAL ||
-            ((struct Token*)(tokens[i]))->type == DECIMAL_INT_LITERAL ||
-            ((struct Token*)(tokens[i]))->type == DOUBLE_LITERAL) {
-            ++quantity_of_arguments;
-        }
-        ++i;
+struct Write_Float_Function get_write_float(void** tokens, int start, int end, int* is_error) {
+    int i = start + 2;
+    struct Write_Float_Function write_float;
+
+    if (((struct Token*)(tokens[i]))->type == IDENTIFIER) {
+        write_float.is_var = true;
+    } else {
+        write_float.is_var = false;
     }
 
-    i = temp;
-    func_calling.arguments = (char**)malloc(quantity_of_arguments * sizeof(char*));
-    int j = 0;
-    while (i < closed_bracket) {
-        if (((struct Token*)(tokens[i]))->type == IDENTIFIER ||
-            ((struct Token*)(tokens[i]))->type == CHAR_LITERAL ||
-            ((struct Token*)(tokens[i]))->type == DECIMAL_INT_LITERAL ||
-            ((struct Token*)(tokens[i]))->type == DOUBLE_LITERAL) {
-            func_calling.arguments[j] = ((struct Token*)(tokens[i]))->attributes->text;
-        }
-        ++i;
-    }
-
-    return func_calling;
+    write_float.value = ((struct Token*)(tokens[i]))->attributes->text;
+    return write_float;
 }

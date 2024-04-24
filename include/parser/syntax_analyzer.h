@@ -59,3 +59,9 @@ bool is_read_int(void** tokens, const int* start_position, int end, int* is_erro
 
 
 bool is_write_int(void** tokens, const int* start_position, int end, int* is_error);
+
+
+bool is_read_double(void** tokens, const int* start_position, int end, int* is_error);
+
+
+bool is_write_double(void** tokens, const int* start_position, int end, int* is_error);

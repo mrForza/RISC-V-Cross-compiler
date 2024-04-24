@@ -14,7 +14,7 @@ enum Type_Of_Token {
     CHAR_LITERAL = 7,
     CHAR = 8,
     INT = 9,
-    DOUBLE = 10,
+    FLOAT = 10,
     IF = 11,
     ELSE = 12,
     WHILE = 13,

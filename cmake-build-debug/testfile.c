@@ -1,10 +1,18 @@
 int main() {
-    int n;
-    int result = 1;
-    read_int(n);
-    while (n > 0) {
-        result = result * n;
-        n = n - 1;
+    int result = 1; // Lorem ipsum doler sit amet
+    int n = 5;
+    /*
+     *
+     * 1 2 3 4 5 6 7
+ *
+*
+ *
+     *
+     */
+    while (n > 0) { // While loop
+        result *= n; // Reuslt var
+        n -= 1;
     }
-    write_int(result);
 }
+
+

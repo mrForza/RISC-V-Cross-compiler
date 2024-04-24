@@ -1,10 +1,4 @@
-int get_square(int x) {
-    int a = 1;
-    a = a + 2;
-    int b, c, d;
-}
-
-
 int main() {
-    get_square(3);
+    int a = (3 * 5) + (8 * (1 - 12));
+    write_int(a);
 }

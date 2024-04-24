@@ -49,7 +49,7 @@ void print_all_tokens(struct Vector* tokens) {
             case INT:
                 printf("INT: ");
                 break;
-            case DOUBLE:
+            case FLOAT:
                 printf("DOUBLE: ");
                 break;
             case IF:
@@ -160,7 +160,8 @@ void print_syntax_constructions(struct Grammar* grammars, size_t size) {
         struct If_Else if_else_statement;
         struct While while_statement;
         struct Do_While do_while_statement;
-        struct Function_Declaration function_declaration;
+        struct For for_statement;
+
         switch (grammars[i].type) {
             case SINGLE_DECLARATION:
                 printf("%s", concatenate(multiply_string("\t", global_tab_counter), "SINGLE_DECLARATION\n\n"));
@@ -215,14 +216,7 @@ void print_syntax_constructions(struct Grammar* grammars, size_t size) {
                 printf("FOR_STATEMENT\n\n");
                 break;
             case FUNCTION_DECLARATION:
-                function_declaration = *((struct Function_Declaration*)grammars[i].data);
-                printf("%s", concatenate(multiply_string("\t", global_tab_counter), "FUNCTION_DECLARATION\n"));
-                ++global_tab_counter;
-                print_syntax_constructions(function_declaration.body, function_declaration.quantity_of_grammars);
-                --global_tab_counter;
-                break;
-            case FUNCTION_CALLING:
-                printf("FUNCTION_CALLING\n\n");
+                printf("FUNCTION_DECLARATION\n\n");
                 break;
             case ASSIGNMENT_EXPRESSION:
                 printf("ASSIGNMENT_EXPRESSION\n\n");
@@ -236,15 +230,6 @@ void print_syntax_constructions(struct Grammar* grammars, size_t size) {
             case WRITE_INT:
                 printf("WRITE_INT\n\n");
                 break;
-            case READ_CHAR:
-                printf("READ_CHAR\n\n");
-                break;
-            case WRITE_CHAR:
-                printf("WRITE_CHAR\n\n");
-                break;
-            case UNKNOWN:
-                printf("UNKNOWN\n\n");
-                break;
         }
     }
 }
@@ -254,6 +239,7 @@ int main(int argc, char** argv) {
     struct file_handler handler;
     FILE* open_file_pointer;
     FILE* asm_file_pointer;
+    FILE* formatted_file_pointer;
     char* buffer;
 
     printf("%s\n", GREETINGS_TEXT);
@@ -268,6 +254,7 @@ int main(int argc, char** argv) {
     if (open_file_pointer) {
         fseek(open_file_pointer, 0L, SEEK_END);
         handler.size = ftell(open_file_pointer);
+        handler.file_pointer = open_file_pointer;
         fseek(open_file_pointer, 0L, SEEK_SET);
         buffer = (char*)malloc((handler.size + 1) * sizeof(char));
         fread(buffer, sizeof(char), handler.size, open_file_pointer);
@@ -276,13 +263,24 @@ int main(int argc, char** argv) {
         return -1;
     }
 
-    // delete_singleline_comments(handler);
-    // delete_multiline_comments(handler);
-    // fclose(handler.file_pointer);
-    // delete_repetitive_spaces(handler);
+    delete_singleline_comments(handler);
+    delete_multiline_comments(handler);
+    fclose(handler.file_pointer);
+
+    /*formatted_file_pointer = fopen("formatted_2.c", "r");
+    if (formatted_file_pointer) {
+        fseek(formatted_file_pointer, 0L, SEEK_END);
+        handler.size = ftell(formatted_file_pointer);
+        fseek(formatted_file_pointer, 0L, SEEK_SET);
+        buffer = (char*)malloc((handler.size + 1) * sizeof(char));
+        fread(buffer, sizeof(char), handler.size, formatted_file_pointer);
+        buffer[strlen(buffer)] = '\0';
+    } else {
+        printf("Cannot open file\n");
+        return -1;
+    }*/
 
     struct Lexer* lexer = (struct Lexer*)malloc(sizeof(struct Lexer));
-    buffer[strlen(buffer)] = '\0';
     *lexer = init_lexer(buffer, strlen(buffer));
     printf("TOKENS:\n");
     print_all_tokens(get_all_tokens(lexer));

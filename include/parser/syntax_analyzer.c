@@ -229,7 +229,7 @@ bool is_single_declaration_expression(void** tokens, const int* start_position, 
     int i = *start_position;
     if (((struct Token*)(tokens[i]))->type != INT
         && ((struct Token*)(tokens[i]))->type != CHAR
-        && ((struct Token*)(tokens[i]))->type != DOUBLE) {
+        && ((struct Token*)(tokens[i]))->type != FLOAT) {
         return false;
     }
     ++i;
@@ -251,7 +251,7 @@ bool is_single_definition_expression(void** tokens, const int* start_position, i
     int i = *start_position;
     if (((struct Token*)(tokens[i]))->type != INT
         && ((struct Token*)(tokens[i]))->type != CHAR
-        && ((struct Token*)(tokens[i]))->type != DOUBLE) {
+        && ((struct Token*)(tokens[i]))->type != FLOAT) {
         return false;
     }
     ++i;
@@ -298,7 +298,7 @@ bool is_complex_declaration_expression(void** tokens, const int* start_position,
     int i = *start_position;
     if (((struct Token*)(tokens[i]))->type != INT
         && ((struct Token*)(tokens[i]))->type != CHAR
-        && ((struct Token*)(tokens[i]))->type != DOUBLE) {
+        && ((struct Token*)(tokens[i]))->type != FLOAT) {
         return false;
     }
     ++i;
@@ -328,7 +328,7 @@ bool is_complex_definition_expression(void** tokens, const int* start_position, 
     int i = *start_position;
     if (((struct Token*)(tokens[i]))->type != INT
         && ((struct Token*)(tokens[i]))->type != CHAR
-        && ((struct Token*)(tokens[i]))->type != DOUBLE) {
+        && ((struct Token*)(tokens[i]))->type != FLOAT) {
         return false;
     }
     ++i;
@@ -635,7 +635,7 @@ bool is_function_declaration(void** tokens, const int* start_position, int end, 
 
     if (((struct Token*)(tokens[i]))->type == INT ||
         ((struct Token*)(tokens[i]))->type == CHAR ||
-        ((struct Token*)(tokens[i]))->type == DOUBLE ) {
+        ((struct Token*)(tokens[i]))->type == FLOAT ) {
         ++i;
         if (((struct Token*)(tokens[i]))->type == IDENTIFIER) {
             ++i;
@@ -647,35 +647,17 @@ bool is_function_declaration(void** tokens, const int* start_position, int end, 
                     return false;
                 }
                 ++i;
-
-                _get_arguments:
-                if (((struct Token*)(tokens[i]))->type == CHAR ||
-                    ((struct Token*)(tokens[i]))->type == INT ||
-                    ((struct Token*)(tokens[i]))->type == DOUBLE) {
-                    ++i;
-                    if (((struct Token*)(tokens[i]))->type == IDENTIFIER) {
-                        ++i;
-                        if (((struct Token*)(tokens[i]))->type == COMMA) {
-                            goto _get_arguments;
-                        } else if (((struct Token*)(tokens[i]))->type == RIGHT_ROUND_BRACKET) {
-                            goto _check_curly_brackets;
+                if (is_complex_declaration_expression(tokens, &i, closed_round_brackets - 1, is_error)) {
+                    i = closed_round_brackets + 1;
+                    if (((struct Token*)(tokens[i]))->type == LEFT_CURLY_BRACKET) {
+                        int closed_curly_index = find_close_curly_bracket(tokens, i, end);
+                        if (closed_curly_index == -1) {
+                            printf("SYNTAX ERROR: No closed curly brackets!");
+                            *is_error = 1;
+                            return false;
                         }
+                        return true;
                     }
-                    printf("SYNTAX ERROR: Incorrect function arguments!");
-                    *is_error = 1;
-                    return false;
-                }
-
-            _check_curly_brackets:
-                i = closed_round_brackets + 1;
-                if (((struct Token*)(tokens[i]))->type == LEFT_CURLY_BRACKET) {
-                    int closed_curly_index = find_close_curly_bracket(tokens, i, end);
-                    if (closed_curly_index == -1) {
-                        printf("SYNTAX ERROR: No closed curly brackets!");
-                        *is_error = 1;
-                        return false;
-                    }
-                    return true;
                 }
             }
         }
@@ -691,7 +673,7 @@ bool is_function_calling(void** tokens, const int* start_position, int end, int*
     if (((struct Token*)(tokens[i]))->type == IDENTIFIER) {
         ++i;
         if (((struct Token*)(tokens[i]))->type == LEFT_ROUND_BRACKET) {
-            int closed_round_brackets = find_close_bracket(tokens, i, end + 1);
+            int closed_round_brackets = find_close_bracket(tokens, i, end);
             if (closed_round_brackets == -1) {
                 printf("SYNTAX ERROR: No closed round brackets!");
                 *is_error = 1;
@@ -699,10 +681,7 @@ bool is_function_calling(void** tokens, const int* start_position, int end, int*
             }
             ++i;
             while (i < closed_round_brackets) {
-                if (((struct Token*)(tokens[i]))->type == IDENTIFIER ||
-                    ((struct Token*)(tokens[i]))->type == CHAR_LITERAL ||
-                    ((struct Token*)(tokens[i]))->type == DECIMAL_INT_LITERAL ||
-                    ((struct Token*)(tokens[i]))->type == DOUBLE_LITERAL) {
+                if (((struct Token*)(tokens[i]))->type == IDENTIFIER) {
                     ++i;
                 }
                 if (((struct Token*)(tokens[i]))->type == COMMA) {
@@ -778,6 +757,76 @@ bool is_write_int(void** tokens, const int* start_position, int end, int* is_err
                 return true;
             } else {
                 printf("SEMANTIC ERROR: read_int function should take variable or int literal!");
+                *is_error = 1;
+                return false;
+            }
+        }
+    }
+
+    return false;
+}
+
+bool is_read_float(void** tokens, const int* start_position, int end, int* is_error) {
+    int i = *start_position;
+
+    if (((struct Token*)(tokens[i]))->type == IDENTIFIER &&
+        strcmp(((struct Token*)(tokens[i]))->attributes->text, "read_float") == 0) {
+        ++i;
+        if (((struct Token*)(tokens[i]))->type == LEFT_ROUND_BRACKET) {
+            int closed_bracket = find_close_bracket(tokens, i, end + 1);
+            if (closed_bracket == -1) {
+                printf("SYNTAX ERROR: No closed bracket!");
+                *is_error = 1;
+                return false;
+            }
+
+            if (closed_bracket - i > 2) {
+                printf("SEMANTIC ERROR: read_double function should take only one argument!");
+                *is_error = 1;
+                return false;
+            }
+
+            ++i;
+            if (((struct Token*)(tokens[i]))->type == IDENTIFIER) {
+                return true;
+            } else {
+                printf("SEMANTIC ERROR: read_double function should take variable!");
+                *is_error = 1;
+                return false;
+            }
+        }
+    }
+
+    return false;
+}
+
+
+bool is_write_float(void** tokens, const int* start_position, int end, int* is_error) {
+    int i = *start_position;
+
+    if (((struct Token*)(tokens[i]))->type == IDENTIFIER &&
+        strcmp(((struct Token*)(tokens[i]))->attributes->text, "write_float") == 0) {
+        ++i;
+        if (((struct Token*)(tokens[i]))->type == LEFT_ROUND_BRACKET) {
+            int closed_bracket = find_close_bracket(tokens, i, end + 1);
+            if (closed_bracket == -1) {
+                printf("SYNTAX ERROR: No closed bracket!");
+                *is_error = 1;
+                return false;
+            }
+
+            if (closed_bracket - i > 2) {
+                printf("SEMANTIC ERROR: write_double function should take only one argument!");
+                *is_error = 1;
+                return false;
+            }
+
+            ++i;
+            if (((struct Token*)(tokens[i]))->type == IDENTIFIER ||
+                ((struct Token*)(tokens[i]))->type == DOUBLE_LITERAL) {
+                return true;
+            } else {
+                printf("SEMANTIC ERROR: write_double function should take variable or int literal!");
                 *is_error = 1;
                 return false;
             }
